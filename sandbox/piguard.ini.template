@@ -1,0 +1,13 @@
+[twitter]
+consumer_key = <consumer_key>
+consumer_secret = <consumer_secret>
+access_key = <access_key>
+access_secret = <access_secret>
+
+[mqtt]
+device_id = <device_id>
+broker_host = <rabbitmq_host>
+broker_port = 1883
+user = <mqtt_user>
+password = <mqtt_pass>
+vhost = <rabbitmq_vhost>

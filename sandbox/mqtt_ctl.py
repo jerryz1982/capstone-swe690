@@ -2,14 +2,19 @@ import datetime
 import json  
 import paho.mqtt.client  
 import time  
+
+from piguard.common import config
+
+cfg = config.PiguardConfig()
+
 sleepTime = 30 
 # MQTT details  
-mqttDeviceId = "Raspberry-Pi:Prototype" 
-mqttBrokerHost = "hyena.rmq.cloudamqp.com"  
-mqttBrokerPort = 1883  
-mqttUser = "dfwxdeyo"  
-mqttPassword = "GTFbKpT7scn2nXgrWrtzfRLaniD0wfMr"  
-mqttVhost = "dfwxdeyo"
+mqttDeviceId = cfg.mqtt_device_id
+mqttBrokerHost = cfg.mqtt_broker_host
+mqttBrokerPort = cfg.mqtt_broker_port
+mqttUser = cfg.mqtt_user
+mqttPassword = cfg.mqtt_password
+mqttVhost = cfg.mqtt_vhost
 mqttTelemetryTopic = "RPi.Data"
 mqttControlTopic = "RPi.Control"
 # Callback methods  
