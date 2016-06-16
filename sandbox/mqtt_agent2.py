@@ -2,7 +2,7 @@ import datetime
 import json  
 import paho.mqtt.client  
 import time  
-import RPi.GPIO as GPIO
+#import RPi.GPIO as GPIO
 
 from piguard.common import config
 
@@ -19,9 +19,9 @@ mqttVhost = cfg.mqtt_vhost
 mqttTelemetryTopic = "RPi.Data"  
 mqttControlTopic = "RPi.Control"
 mqttRegisterTopic = "RPi.Register"
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(17, GPIO.OUT)
-GPIO.setup(4, GPIO.IN)
+#GPIO.setmode(GPIO.BCM)
+#GPIO.setup(17, GPIO.OUT)
+#GPIO.setup(4, GPIO.IN)
 
 
 # Callback methods  
@@ -45,7 +45,7 @@ def on_message(client, userdata, message):
     alarm = json.loads(message.payload)["alarm_on"]
     if alarm == "False":
         print("Turn off alarm")
-        GPIO.output(17, False)
+        #GPIO.output(17, False)
 
 mqttClient = paho.mqtt.client.Client()  
 mqttClient.username_pw_set(mqttVhost + ":" + mqttUser, mqttPassword)  
@@ -71,15 +71,15 @@ registryData["MacAddr"] = mac_address
 registryDataJson = json.dumps(registryData)
 
 while True:
-  if GPIO.input(4):
-    GPIO.output(17, True)
+    mqttClient.publish(mqttRegisterTopic, registryDataJson, 1)
+#  if GPIO.input(4):
+#    GPIO.output(17, True)
     telemetryData = {}
     telemetryData["DeviceId"] = mqttDeviceId  
     telemetryData["Timestamp"] = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]  
     telemetryData["Motion"] = "True"
     telemetryDataJson = json.dumps(telemetryData)  
     mqttClient.publish(mqttTelemetryTopic, telemetryDataJson, 1) 
-  mqttClient.publish(mqttRegisterTopic, registryDataJson, 1)
-  time.sleep(sleepTime)
+    time.sleep(sleepTime)  
 mqttClient.loop_stop()  
 mqttClient.disconnect()  

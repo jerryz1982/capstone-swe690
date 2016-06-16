@@ -1,0 +1,23 @@
+{
+  "name": "api_server",
+  "version": "1.0.0",
+  "description": "mqtt controller",
+  "main": "mqtt-ctl.js",
+  "dependencies": {
+    "mqtt": "^1.11.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "dahoo",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jerryz1982/capstone-swe690.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jerryz1982/capstone-swe690/issues"
+  },
+  "homepage": "https://github.com/jerryz1982/capstone-swe690#readme"
+}
