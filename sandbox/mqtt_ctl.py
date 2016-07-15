@@ -36,7 +36,8 @@ def on_message(client, userdata, message):
     motion = json.loads(message.payload)['Motion']
     if motion == "True":
         controlData = {}
-        controlData["alarm_on"] = raw_input('leave alarm on? True/False')
+        controlData["reboot"] = raw_input('Reboot? True/False') or "False"
+        controlData["alarm_on"] = raw_input('leave alarm on? True/False') or "False"
         controlDataJson = json.dumps(controlData)
         mqttClient.publish(mqttControlTopic, controlDataJson, 1)
 mqttClient = paho.mqtt.client.Client()  
@@ -52,8 +53,13 @@ mqttClient.on_message = on_message
 mqttClient.connect(mqttBrokerHost, mqttBrokerPort, 60)  
 mqttClient.loop_start()  
 # Collect telemetry information from Sense HAT and publish to MQTT broker in JSON format  
-while True:
-    mqttClient.subscribe(mqttTelemetryTopic, 1) 
-    time.sleep(sleepTime)
+#while True:
+#    mqttClient.subscribe(mqttTelemetryTopic, 1) 
+#    time.sleep(sleepTime)
+controlData = {}
+controlData["reboot"] = raw_input('Reboot? True/False') or "False"
+controlData["alarm_on"] = raw_input('leave alarm on? True/False') or "False"
+controlDataJson = json.dumps(controlData)
+mqttClient.publish(mqttControlTopic, controlDataJson, 1)
 mqttClient.loop_stop()  
 mqttClient.disconnect()  
