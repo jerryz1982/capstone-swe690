@@ -5,6 +5,7 @@ var mongoose = require('mongoose');
 var AgentSchema = new mongoose.Schema({
   deviceid: String,
   mac: String,
+  ip: String,
   update_time: {type: Date, default: Date.now},
 });
 

@@ -33,7 +33,7 @@ function update_agent(deviceId, deviceMac, deviceIP) {
       }
       else {
         console.log('updating agent');
-        Agent.update({deviceid: deviceId}, { $set: { mac: deviceMac, update_time: Date.now() }}, function (err, agent) {
+        Agent.update({deviceid: deviceId}, { $set: { mac: deviceMac, update_time: Date.now(), ip:deviceIP }}, function (err, agent) {
           console.log('updated', agent)
         });
       }
@@ -56,11 +56,11 @@ controller.on('message', function (topic, message) {
     deviceId = message.DeviceId
     deviceMac = message.MacAddr
     deviceIP = message.IPAddr
-    update_agent(deviceId, deviceMac, deviceIPAddr)
+    update_agent(deviceId, deviceMac, deviceIP)
   }
 });
 
-}
+},
 
   control_agent: function(message) {
     controller.publish(mqtt_topic_control, message)

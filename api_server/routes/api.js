@@ -29,10 +29,12 @@ exports.deleteAgent = function (req, res) {
 
 // UPDATE
 exports.updateAgent = function (req, res) {
+  console.log('Updating agent');
   var control_message = {};
+  console.log(req.body)
   control_message["deviceid"] = req.params.id;
   control_message["alarm_on"] = req.body["alarm_on"];
-  control_message["reboot"] = req.params["reboot"];
+  control_message["reboot"] = req.body["reboot"];
   mqtt_ctl.control_agent(JSON.stringify(control_message))
   Agent.update({deviceid: req.params.id}, {
     alarm_on: req.params.alarm_on,

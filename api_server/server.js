@@ -6,6 +6,7 @@ var express = require('express'),
     api = require('./routes/api');
 var mqtt_ctl = require('./mqtt-ctl.js')
 var app = express();
+var bodyParser = require('body-parser')
 
 mongoose.connect('mongodb://rpi:swe690@ds015924.mlab.com:15924/piguard');
 // Configuration
@@ -28,6 +29,7 @@ var allowCrossDomain = function(req, res, next) {
 };
 
 app.use(allowCrossDomain);
+app.use(bodyParser.json());
 
 // JSON API
 app.get('/agents', api.agents);
