@@ -7,7 +7,11 @@ import tweepy
 from picamera import PiCamera
 import os
 
-sleepTime = 30
+
+sleepTime = 10
+deviceid = "Raspberry-Pi:Prototype"
+
+
 #enter the corresponding information from your Twitter application:
 CONSUMER_KEY = 'pEqk36xG4exYbEse25SSIUJcv'#keep the quotes, replace this with your consumer key
 CONSUMER_SECRET = 'L9IVMD5rb5R9aJXKd4puV8sC9UupbNP2eOoPEv0B7KDxa5YUhJ'#keep the quotes, replace this with your consumer secret key
@@ -18,14 +22,16 @@ auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
 api = tweepy.API(auth)
 camera = PiCamera()
 
+
+
 # MQTT details  
-mqttDeviceId = "Raspberry-Pi:Prototype" 
+mqttDeviceId = deviceid 
 mqttBrokerHost = "hyena.rmq.cloudamqp.com"  
-mqttBrokerPort = 1883  
+mqttBrokerPort = 1883
 mqttUser = "dfwxdeyo"  
 mqttPassword = "GTFbKpT7scn2nXgrWrtzfRLaniD0wfMr"  
 mqttVhost = "dfwxdeyo"
-mqttTelemetryTopic = "RPi.Data"  
+mqttTelemetryTopic = "RPi.Data"
 mqttControlTopic = "RPi.Control"
 mqttRegisterTopic = "RPi.Register"
 mqttConfigTopic = "RPi.Config"
@@ -52,11 +58,12 @@ def on_disconnect(client, userdata, rc):
 def on_subscribe(client, userdata, mid, granted_qos):
     print("Subscribed on topic")
 def on_message(client, userdata, message):
-    if message.payload["deviceid"].lower() != mqttDeviceId.lower():
+    message_json = json.loads(message.payload)
+    if message_json["deviceid"].lower() != mqttDeviceId.lower():
       print("not for me, move on")
       pass
     print("Received message " + str(message.payload) + " on topic " + message.topic)
-    alarm = json.loads(message.payload)["alarm_on"].lower()
+    alarm = message_json["alarm_on"].lower()
     if alarm == "false":
         print("Alarm off")
         GPIO.remove_event_detect(4)
@@ -86,6 +93,9 @@ mqttClient.loop_start()
 # Collect telemetry information from Sense HAT and publish to MQTT broker in JSON format  
 mqttClient.subscribe(mqttControlTopic, 1)
 
+registryData = {}
+registryData["DeviceId"] = mqttDeviceId
+
 import netifaces
 default_gw_intf = netifaces.gateways()["default"][netifaces.AF_INET][1]
 default_gw_intf_ip = netifaces.ifaddresses(default_gw_intf)[netifaces.AF_INET][0]["addr"]
@@ -95,11 +105,11 @@ registryData["MacAddr"] = mac_address
 registryDataJson = json.dumps(registryData)
 
 
-def alarm_callback(deviceid=mqttDeviceId):
+def alarm_callback(channel, deviceid=deviceid):
     timestamp = time.strftime("%y%m%d_%H%M%S")
     filename = "".join(["/tmp/pic", timestamp, ".jpg"])
     camera.capture(filename)
-    message = "Motion Detected at " + timestamp + " by " + deviceid
+    message = "Motion Detected at " + timestamp + " by " + str(deviceid)
     api.update_with_media(filename, status=message + " @xyzjerry #motion5493")
     os.remove(filename)
 
