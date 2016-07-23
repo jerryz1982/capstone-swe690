@@ -7,6 +7,7 @@ import tweepy
 from picamera import PiCamera
 import os
 
+from tweepy.error import TweepError
 
 sleepTime = 10
 deviceid = "Raspberry-Pi:Prototype"
@@ -64,7 +65,11 @@ def on_message(client, userdata, message):
       pass
     print("Received message " + str(message.payload) + " on topic " + message.topic)
     if 'delete' in message_json:
-       api.destroy_status(message_json["delete"])
+      try:
+        api.destroy_status(message_json["delete"])
+        print("tweet deleted")
+      except TweepError:
+        print("tweet doesn't exist")
     if 'alarm_on' in message_json:
       alarm = message_json["alarm_on"].lower()
       if alarm == "false":
@@ -121,7 +126,7 @@ def alarm_callback(channel, deviceid=deviceid):
 #    telemetryData["Timestamp"] = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
     telemetryData["Timestamp"] = timestamp
     telemetryData["Type"] = "motion"
-    telemetryData["Tweet_id"] = tweet._json["entities"]["media"][0]["id"]
+    telemetryData["Tweet_id"] = str(tweet.id)
     telemetryData["Tweet_url"] = tweet._json["entities"]["media"][0]["url"]
     telemetryDataJson = json.dumps(telemetryData)
     mqttClient.publish(mqttTelemetryTopic, telemetryDataJson, 1)
