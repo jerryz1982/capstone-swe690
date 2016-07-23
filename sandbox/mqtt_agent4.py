@@ -63,20 +63,23 @@ def on_message(client, userdata, message):
       print("not for me, move on")
       pass
     print("Received message " + str(message.payload) + " on topic " + message.topic)
-    alarm = message_json["alarm_on"].lower()
-    if alarm == "false":
-        print("Alarm off")
-        GPIO.remove_event_detect(4)
-        GPIO.output(17, False)
-    elif alarm == "true":
-        print("Alarm on")
-        try:
-            GPIO.add_event_detect(4, GPIO.RISING)
-            GPIO.add_event_callback(4, alarm_callback)
-        except RuntimeError:
-            print("alarm is already on")
-    else:
-        print("invalid input")
+    if 'delete' in message_json:
+       api.destroy_status(message_json["delete"])
+    if 'alarm_on' in message_json:
+      alarm = message_json["alarm_on"].lower()
+      if alarm == "false":
+          print("Alarm off")
+          GPIO.remove_event_detect(4)
+          GPIO.output(17, False)
+      elif alarm == "true":
+          print("Alarm on")
+          try:
+              GPIO.add_event_detect(4, GPIO.RISING)
+              GPIO.add_event_callback(4, alarm_callback)
+          except RuntimeError:
+              print("alarm is already on")
+      else:
+          print("invalid input")
 
 mqttClient = paho.mqtt.client.Client()  
 mqttClient.username_pw_set(mqttVhost + ":" + mqttUser, mqttPassword)  
@@ -110,16 +113,18 @@ def alarm_callback(channel, deviceid=deviceid):
     filename = "".join(["/tmp/pic", timestamp, ".jpg"])
     camera.capture(filename)
     message = "Motion Detected at " + timestamp + " by " + str(deviceid)
-    api.update_with_media(filename, status=message + " @xyzjerry #motion5493")
+    tweet = api.update_with_media(filename, status=message + " @xyzjerry #motion5493")
     os.remove(filename)
 
     telemetryData = {}
     telemetryData["DeviceId"] = deviceid
 #    telemetryData["Timestamp"] = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
     telemetryData["Timestamp"] = timestamp
-    telemetryData["Motion"] = "True"
-    telemetryDataJson = json.dumps(telemetryData)  
-    mqttClient.publish(mqttTelemetryTopic, telemetryDataJson, 1) 
+    telemetryData["Type"] = "motion"
+    telemetryData["Tweet_id"] = tweet._json["entities"]["media"][0]["id"]
+    telemetryData["Tweet_url"] = tweet._json["entities"]["media"][0]["url"]
+    telemetryDataJson = json.dumps(telemetryData)
+    mqttClient.publish(mqttTelemetryTopic, telemetryDataJson, 1)
     GPIO.output(17, True)
 
 def main_loop(sleep=sleepTime):

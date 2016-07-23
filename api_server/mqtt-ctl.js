@@ -1,6 +1,7 @@
 var mqtt = require('mqtt');
 var mongoose = require('mongoose');
 var Agent = require('./db/models/agent.js');
+var Alarm = require('./db/models/alarm.js');
 var mqtt_host = 'hyena.rmq.cloudamqp.com' 
 var mqtt_port = '1883'
 var mqtt_user = 'dfwxdeyo'
@@ -50,14 +51,36 @@ controller.on('connect', function () {
 controller.on('message', function (topic, message) {
   messageStr = message.toString()
   console.log('received message ',  messageStr, topic);
+  message = JSON.parse(messageStr)
+
   if (topic=="RPi/Register") {
-    message = JSON.parse(messageStr)
     console.log('registering agent in db', message.MacAddr)
     deviceId = message.DeviceId
     deviceMac = message.MacAddr
     deviceIP = message.IPAddr
     update_agent(deviceId, deviceMac, deviceIP)
   }
+
+  if (topic=="RPi/Data") {
+    console.log('saving alarm', message)
+    newalarm = new Alarm ({
+      tweet_id: message.Tweet_id,
+      tweet_url: message.Tweet_url,
+      type: message.Type,
+      time: message.Timestamp,
+      deviceid: message.DeviceId,
+      state: "active"
+    }, function(err) {
+        if (err) {
+          console.log('error creating alarm')
+        } else {
+          console.log('alarm created')
+        }
+      } 
+    );
+    newalarm.save()
+  }
+
 });
 
 },
