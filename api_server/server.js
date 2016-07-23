@@ -37,6 +37,11 @@ app.get('/agents/:id', api.agent);
 app.delete('/agents/:id', api.deleteAgent);
 app.put('/agents/:id', api.updateAgent);
 
+app.get('/alarms', api.alarms);
+app.get('/alarms/:id', api.alarm);
+app.delete('/alarms/:id', api.deleteAlarm);
+app.put('/alarms/:id', api.updateAlarm);
+
 // Start mqtt controller
 mqtt_ctl.init();
 

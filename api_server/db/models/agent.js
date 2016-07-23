@@ -7,6 +7,7 @@ var AgentSchema = new mongoose.Schema({
   mac: String,
   ip: String,
   update_time: {type: Date, default: Date.now},
+  alarm_on: Boolean,
 });
 
 

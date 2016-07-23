@@ -18,4 +18,5 @@ api = tweepy.API(auth)
  
 line = "hello world @xyzjerry #motion5493" 
 #api.update_status(line)
-api.update_with_media("/home/dahoo/Pictures/helloworld.gif", line)
+tweet_status = api.update_with_media("/home/dahoo/Pictures/helloworld.gif", line)
+import pdb; pdb.set_trace()
