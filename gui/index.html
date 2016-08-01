@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html ng-app="piguard">
+  <head>
+    <link rel="stylesheet" type="text/css" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" />
+    <style>
+      td,th {
+        padding: 10 10 0 10;
+        margin: 10 10 10 10;
+        text-align: center;
+      }
+      caption {
+        font-size: 1.6em;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div ng-controller="AgentsController as agentsctrlr">
+      <table>
+      <caption>Agents</caption>
+      <thead>
+      <tr>
+      <th>Alarms</th>
+      <th>Device ID</th>
+      <th>IP Address</th>
+      <th>MAC Address</th>
+      <th>Update Time</th>
+      <th>Arm/Disarm</th>
+      </tr>
+      </thead>
+      <tbody ng-repeat="agent in agentsctrlr.items | orderBy:'-deviceid'">
+      <tr>
+        <td>
+          <button ng-if="agent.expanded" ng-click="agent.expanded = false">-</button>
+          <button ng-if="!agent.expanded" ng-click="agent.expanded = true; getAlarms(agent.deviceid)">+</button>
+        </td>
+        <td> {{ agent.deviceid }}</td>
+        <td>{{ agent.ip }}</td>
+        <td>{{ agent.mac }}</td>
+        <td>{{ agent.update_time }}</td>
+        <td>
+        <button ng-show="agent.alarm_on" ng-click='arm(agent.deviceid, false)'>Disarm</button>
+        <button ng-hide="agent.alarm_on" ng-click='arm(agent.deviceid, true)'>Arm</button>
+        </td>
+      </tr>
+      <tr ng-if="agent.expanded">
+        <td colspan="6">
+          <table>
+          <tr>
+            <th>Time</th>
+            <th>Type</th>
+            <th>Tweet URL</th>
+            <th>Status</th>
+            <th>Acknowledge?</th>
+          </tr>
+          <tr ng-repeat="alarm in agentsctrlr.alarms[agent.deviceid] | orderBy:'time'">
+            <td>{{ alarm.time }}</td>
+            <td>{{ alarm.type }}</td>
+            <td><a href="{{ alarm.tweet_url }}">{{ alarm.tweet_url }}</a></td>
+            <td>{{ alarm.state }}</td>
+            <td><button ng-disabled="alarm.state=='acknowledged'" ng-click='arm(agent.deviceid, false)'>Acknowledge</button></td>
+          </tr>
+          </table>
+        </td>
+      </tr>
+      </tbody>
+      </table>
+    </div>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+    <script type="text/javascript" src="app.js"></script>
+  </body>
+</html>

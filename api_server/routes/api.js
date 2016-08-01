@@ -14,9 +14,15 @@ exports.agents = function (req, res) {
 
 exports.alarms = function (req, res) {
   console.log('Getting alarms.');
-  Alarm.find({}, function(err, alarms) {
-    res.send(alarms)
-  });
+  if (req.query.deviceid) {
+    Alarm.find({'deviceid': req.query.deviceid}, function(err, alarms) {
+      res.send(alarms)
+    });
+  } else {
+    Alarm.find({}, function(err, alarms) {
+      res.send(alarms)
+    });
+  }
 };
 
 exports.agent = function (req, res) {
