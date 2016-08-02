@@ -1,70 +1,82 @@
 <!DOCTYPE html>
 <html ng-app="piguard">
   <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="styles.css" />
     <style>
-      td,th {
-        padding: 10 10 0 10;
-        margin: 10 10 10 10;
-        text-align: center;
-      }
       caption {
+        color: darkgray;
         font-size: 1.6em;
         font-weight: bold;
+        text-align: center;
       }
     </style>
   </head>
   <body>
-    <div ng-controller="AgentsController as agentsctrlr">
-      <table>
-      <caption>Agents</caption>
+    <div ng-include="'nav.htm'"></div>
+    <div id="no-more-tables">
+    <div class="container page">
+    <div class="content" ng-controller="AgentsController as agentsctrlr">
+      <table cellpadding="0">
+      <caption>PiGuard Management Console</caption>
       <thead>
       <tr>
-      <th>Alarms</th>
       <th>Device ID</th>
       <th>IP Address</th>
       <th>MAC Address</th>
       <th>Update Time</th>
       <th>Arm/Disarm</th>
+      <th>Alarms</th>
       </tr>
       </thead>
-      <tbody ng-repeat="agent in agentsctrlr.items | orderBy:'-deviceid'">
-      <tr>
-        <td>
-          <button ng-if="agent.expanded" ng-click="agent.expanded = false">-</button>
-          <button ng-if="!agent.expanded" ng-click="agent.expanded = true; getAlarms(agent.deviceid)">+</button>
-        </td>
-        <td> {{ agent.deviceid }}</td>
-        <td>{{ agent.ip }}</td>
-        <td>{{ agent.mac }}</td>
-        <td>{{ agent.update_time }}</td>
-        <td>
+      </tbody>
+      <tr ng-repeat-start="agent in agentsctrlr.items | orderBy:'-deviceid'">
+        <td data-title="Device ID"> {{ agent.deviceid }}</td>
+        <td data-title="IP Address">{{ agent.ip }}</td>
+        <td data-title="MAC Address">{{ agent.mac }}</td>
+        <td data-title="Update Time">{{ agent.update_time }}</td>
+        <td data-title="Arm/Disarm">
         <button ng-show="agent.alarm_on" ng-click='arm(agent.deviceid, false)'>Disarm</button>
         <button ng-hide="agent.alarm_on" ng-click='arm(agent.deviceid, true)'>Arm</button>
         </td>
+        <td data-title="Alarms">
+          <button ng-if="agent.expanded" ng-click="agent.expanded = false">-</button>
+          <button ng-if="!agent.expanded" ng-click="agent.expanded = true; getAlarms(agent.deviceid)">+</button>
+        </td>
       </tr>
-      <tr ng-if="agent.expanded">
+      <tr ng-if="agent.expanded" ng-repeat-end>
         <td colspan="6">
-          <table>
+          <table cellpadding=0 ng-show="agentsctrlr.alarms[agent.deviceid].length">
+          <caption>Alarms</caption>
+          <thead>
           <tr>
             <th>Time</th>
             <th>Type</th>
             <th>Tweet URL</th>
             <th>Status</th>
-            <th>Acknowledge?</th>
+            <th>Actions</th>
           </tr>
+          </thead>
+          <tbody>
           <tr ng-repeat="alarm in agentsctrlr.alarms[agent.deviceid] | orderBy:'time'">
-            <td>{{ alarm.time }}</td>
-            <td>{{ alarm.type }}</td>
-            <td><a href="{{ alarm.tweet_url }}">{{ alarm.tweet_url }}</a></td>
-            <td>{{ alarm.state }}</td>
-            <td><button ng-disabled="alarm.state=='acknowledged'" ng-click='arm(agent.deviceid, false)'>Acknowledge</button></td>
+            <td data-title="Time">{{ alarm.time }}</td>
+            <td data-title="Type">{{ alarm.type }}</td>
+            <td data-title="Tweet URL"><a href="{{ alarm.tweet_url }}">{{ alarm.tweet_url }}</a></td>
+            <td data-title="Status">{{ alarm.state }}</td>
+            <td data-title="Actions">
+              <button ng-disabled="alarm.state=='acknowledged'" ng-click='ack_alarm(agent.deviceid,alarm.tweet_id)'>Acknowledge</button>
+              <button ng-click='del_alarm(agent.deviceid,alarm.tweet_id)'>Delete</button>
+            </td>
           </tr>
+          </tbody>
           </table>
         </td>
       </tr>
       </tbody>
       </table>
+    </div>
+    </div>
     </div>
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
     <script type="text/javascript" src="app.js"></script>
