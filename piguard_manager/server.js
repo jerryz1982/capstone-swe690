@@ -8,6 +8,16 @@ var mqtt_ctl = require('./mqtt-ctl.js')
 var mongoose = require('./db/connect.js')
 var app = express();
 var bodyParser = require('body-parser')
+var port = process.env.PORT || 8000;
+
+//set gui root dir
+app.use(express.static(__dirname + '/gui'));
+
+// set the home page route
+app.get('/', function(req, res) {
+
+    res.render('index');
+});
 
 //mongoose.connect('mongodb://rpi:swe690@ds015924.mlab.com:15924/piguard');
 mongoose.init()
@@ -49,5 +59,6 @@ app.put('/alarms/:id', api.updateAlarm);
 mqtt_ctl.init();
 
 // Start server
-app.listen(8000);
-console.log("Server running at http://127.0.0.1:8000/");
+app.listen(port, function() {
+  console.log("Server running at http://127.0.0.1:" + port);
+});
