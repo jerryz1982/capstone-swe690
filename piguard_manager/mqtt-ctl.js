@@ -46,8 +46,8 @@ controller.on('connect', function () {
   controller.subscribe(mqtt_topic_register, { qos: 1 });
 });
 
-controller.on('error', function(error) {
-  console.log('mqtt error occurred: ' + error)
+controller.on('error', function(err) {
+  console.log('mqtt error occurred: ' + err)
 });
 
 controller.on('message', function (topic, message) {
