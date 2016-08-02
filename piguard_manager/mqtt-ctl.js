@@ -1,5 +1,4 @@
 var mqtt = require('mqtt');
-var mongoose = require('mongoose');
 var Agent = require('./db/models/agent.js');
 var Alarm = require('./db/models/alarm.js');
 var mqtt_host = 'hyena.rmq.cloudamqp.com' 
@@ -16,7 +15,6 @@ var url  = 'mqtt://' + mqtt_host + ':' + mqtt_port;
 var controller = mqtt.connect(url, { username: mqtt_vhost + ":" + mqtt_user, password: mqtt_pass, clientId: 'mqtt-ctl', clean: true });
 
 var configfile = {"message": "hellow world!"}
-//mongoose.connect('mongodb://rpi:swe690@ds015924.mlab.com:15924/piguard');
 module.exports = { init: function() {
 
 function update_agent(deviceId, deviceMac, deviceIP) {
@@ -46,6 +44,10 @@ function update_agent(deviceId, deviceMac, deviceIP) {
 controller.on('connect', function () {  
   controller.subscribe(mqtt_topic_data, { qos: 1 });
   controller.subscribe(mqtt_topic_register, { qos: 1 });
+});
+
+controller.on('error', function(error) {
+  console.log('mqtt error occurred: ' + error)
 });
 
 controller.on('message', function (topic, message) {

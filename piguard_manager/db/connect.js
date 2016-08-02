@@ -5,7 +5,7 @@ var timeout = parseInt(process.env.MONGODB_TIMEOUT)
 var options = {
                 server:{auto_reconnect:true,
                         socketOptions: { socketTimeoutMS: timeout,
-                                         keepAlive: timeout,
+                                         keepAlive: 10,
                                          connectTimeoutMS: timeout }
                        }
               }
