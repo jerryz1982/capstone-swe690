@@ -1,14 +1,17 @@
 /**
  * Module dependencies.
  */
-var mongoose = require('mongoose');
+//var mongoose = require('mongoose');
 var express = require('express'),
     api = require('./routes/api');
 var mqtt_ctl = require('./mqtt-ctl.js')
+var mongoose = require('./db/connect.js')
 var app = express();
 var bodyParser = require('body-parser')
 
-mongoose.connect('mongodb://rpi:swe690@ds015924.mlab.com:15924/piguard');
+//mongoose.connect('mongodb://rpi:swe690@ds015924.mlab.com:15924/piguard');
+mongoose.init()
+
 // Configuration
 
 // ## CORS middleware
