@@ -1,7 +1,8 @@
 (function() {
   var app = angular.module('piguard', []);
   app.controller('AgentsController', ['$scope', '$http', function($scope, $http) {
-    var api_url = 'http://127.0.0.1:8000'
+    var port = process.env.PORT || 8000;
+    var api_url = 'http://127.0.0.1:' + port;
     var agents = this;
     var config = {
       headers : {
