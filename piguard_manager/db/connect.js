@@ -1,9 +1,12 @@
 var mongoose = require('mongoose');
 var db = mongoose.connection;
-var dbURI = 'mongodb://rpi:swe690@ds015924.mlab.com:15924/piguard'
+var dbURI = process.env.MONGODB_URI
+var timeout = parseInt(process.env.MONGODB_TIMEOUT)
 var options = {
                 server:{auto_reconnect:true,
-                        socketOptions: { socketTimeoutMS: 30000, keepAlive: 30000, connectTimeoutMS: 30000 }
+                        socketOptions: { socketTimeoutMS: timeout,
+                                         keepAlive: timeout,
+                                         connectTimeoutMS: timeout }
                        }
               }
 module.exports = { init: function() {
