@@ -2,6 +2,7 @@
  * Module dependencies.
  */
 //var mongoose = require('mongoose');
+require('newrelic');
 var express = require('express'),
     api = require('./routes/api');
 var mqtt_ctl = require('./mqtt-ctl.js')
