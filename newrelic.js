@@ -10,7 +10,7 @@ exports.config = {
   /**
    * Array of application names.
    */
-  app_name: ['piguard_manager'],
+  app_name: ['piguard-manager'],
   /**
    * Your New Relic license key.
    */
