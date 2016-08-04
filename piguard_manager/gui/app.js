@@ -1,7 +1,8 @@
 (function() {
   var app = angular.module('piguard', []);
-  app.controller('AgentsController', ['$scope', '$http', function($scope, $http) {
-    var api_url = 'https://piguard-manager.herokuapp.com/api';
+  app.controller('AgentsController', ['$scope', '$http', '$interval', function($scope, $http, $interval) {
+    //var api_url = 'https://piguard-manager.herokuapp.com/api';
+    var api_url = 'http://127.0.0.1:8000/api'
     var agents = this;
     var config = {
       headers : {
@@ -9,6 +10,8 @@
       }
     }
     agents.alarms = {}
+    agents.color = {}
+    agents.expanded = {}
     $scope.arm = function(deviceid, on) {
       var json_data = {
         alarm_on: on
@@ -17,20 +20,39 @@
         $scope.getAgents()
       });
     }
+
     $scope.getAgents = function() {
       $http.get( api_url + '/agents').success(function(agents_data) {
+        agents_data.forEach(function(agent) {
+          $scope.getAgentcolor(agent.deviceid)
+        })
         agents.items = agents_data;
       });
     }
+
+    $scope.getAgentcolor = function(deviceid) {
+      $http.get( api_url + '/agents/' + deviceid ).success(function(agent_data) {
+        if (agent_data.alarm_count>0 && agent_data.alarm_count<10) {
+           agents.color[deviceid] = "orange"
+        }
+        if (agent_data.alarm_count==0) {
+           agents.color[deviceid] = "green"
+        }
+        if (agent_data.alarm_count>=10) {
+           agents.color[deviceid] = "red"
+        }
+      })
+    }
+
     $scope.getAlarms = function(deviceid) {
       $http.get( api_url + '/alarms?deviceid=' + deviceid).success(function(alarms_data) {
         agents.alarms[deviceid] = alarms_data
     });
     }
 
-    $scope.ack_alarm = function(deviceid, alarmid) {
+    $scope.set_alarm = function(deviceid, alarmid, state) {
       var alarm_data = {
-        'state': 'acknowledged'
+        'state': state
       }
       $http.put( api_url + '/alarms/' + alarmid, alarm_data, config).success(function() {
         $scope.getAlarms(deviceid)
@@ -42,8 +64,10 @@
         $scope.getAlarms(deviceid)
       });
     }
-
     $scope.getAgents()
+    $interval(function() {
+      $scope.getAgents()
+    }, 5000);
   }]);
 
 })();

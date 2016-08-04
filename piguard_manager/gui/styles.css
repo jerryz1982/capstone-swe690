@@ -54,3 +54,7 @@ th,td {
         padding: 0.6em;
         text-align: center;
    }
+
+.red { background-color: red }
+.orange { background-color: orange }
+.green { background-color: green }

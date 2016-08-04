@@ -27,8 +27,16 @@ exports.alarms = function (req, res) {
 
 exports.agent = function (req, res) {
   var deviceid = req.params.id;
-  Agent.find({'deviceid': deviceid}, function(err, agent) {
-    res.send(agent)
+  Agent.findOne({'deviceid': deviceid}, function(err, agent) {
+    Alarm.count({deviceid: deviceid, state: "active"}, function(err, c) {
+      agt = agent.toObject()
+      if (!err) {
+        agt["alarm_count"] = c
+      } else {
+        agt["alarm_count"] = -1
+      }
+      res.send(agt)
+    })
   });
 };
 

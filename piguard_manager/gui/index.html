@@ -19,7 +19,7 @@
     <div class="container page">
     <div class="content" ng-controller="AgentsController as agentsctrlr">
       <table cellpadding="0">
-      <caption>PiGuard Management Console</caption>
+      <caption>Dashboard</caption>
       <thead>
       <tr>
       <th>Device ID</th>
@@ -41,11 +41,12 @@
         <button ng-hide="agent.alarm_on" ng-click='arm(agent.deviceid, true)'>Arm</button>
         </td>
         <td data-title="Alarms">
-          <button ng-if="agent.expanded" ng-click="agent.expanded = false">-</button>
-          <button ng-if="!agent.expanded" ng-click="agent.expanded = true; getAlarms(agent.deviceid)">+</button>
+          <button ng-if="agentsctrlr.expanded[agent.deviceid]" ng-click="agentsctrlr.expanded[agent.deviceid] = false">-</button>
+          <button ng-class="agentsctrlr.color[agent.deviceid]"
+                  ng-if="!agentsctrlr.expanded[agent.deviceid]" ng-click="agentsctrlr.expanded[agent.deviceid] = true; getAlarms(agent.deviceid)">+</button>
         </td>
       </tr>
-      <tr ng-if="agent.expanded" ng-repeat-end>
+      <tr ng-if="agentsctrlr.expanded[agent.deviceid]" ng-repeat-end>
         <td colspan="6">
           <table cellpadding=0 ng-show="agentsctrlr.alarms[agent.deviceid].length">
           <caption>Alarms</caption>
@@ -65,7 +66,8 @@
             <td data-title="Tweet URL"><a href="{{ alarm.tweet_url }}" target="_blank">{{ alarm.tweet_url }}</a></td>
             <td data-title="Status">{{ alarm.state }}</td>
             <td data-title="Actions">
-              <button ng-disabled="alarm.state=='acknowledged'" ng-click='ack_alarm(agent.deviceid,alarm.tweet_id)'>Acknowledge</button>
+              <button ng-hide="alarm.state=='acknowledged'" ng-click='set_alarm(agent.deviceid,alarm.tweet_id,"acknowledged")'>Acknowledge</button>
+              <button ng-show="alarm.state=='acknowledged'" ng-click='set_alarm(agent.deviceid,alarm.tweet_id,"active")'>Unacknowledge</button>
               <button ng-click='del_alarm(agent.deviceid,alarm.tweet_id)'>Delete</button>
             </td>
           </tr>
