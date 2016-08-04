@@ -41,9 +41,12 @@
         <button ng-hide="agent.alarm_on" ng-click='arm(agent.deviceid, true)'>Arm</button>
         </td>
         <td data-title="Alarms">
-          <button ng-if="agentsctrlr.expanded[agent.deviceid]" ng-click="agentsctrlr.expanded[agent.deviceid] = false">-</button>
           <button ng-class="agentsctrlr.color[agent.deviceid]"
-                  ng-if="!agentsctrlr.expanded[agent.deviceid]" ng-click="agentsctrlr.expanded[agent.deviceid] = true; getAlarms(agent.deviceid)">+</button>
+                  ng-if="agentsctrlr.expanded[agent.deviceid]"
+                  ng-click="agentsctrlr.expanded[agent.deviceid] = false">-</button>
+          <button ng-class="agentsctrlr.color[agent.deviceid]"
+                  ng-if="!agentsctrlr.expanded[agent.deviceid]"
+                  ng-click="agentsctrlr.expanded[agent.deviceid] = true; getAlarms(agent.deviceid)">+</button>
         </td>
       </tr>
       <tr ng-if="agentsctrlr.expanded[agent.deviceid]" ng-repeat-end>
