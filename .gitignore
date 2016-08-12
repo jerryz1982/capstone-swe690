@@ -23,3 +23,4 @@ subunit.log
 *~
 *.ini
 *node_modules
+*newrelic*

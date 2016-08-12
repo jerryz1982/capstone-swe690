@@ -71,20 +71,18 @@ def on_message(client, userdata, message):
       except TweepError:
         print("tweet doesn't exist")
     if 'alarm_on' in message_json:
-      alarm = message_json["alarm_on"].lower()
-      if alarm == "false":
+      alarm = message_json["alarm_on"]
+      if not alarm:
           print("Alarm off")
           GPIO.remove_event_detect(4)
           GPIO.output(17, False)
-      elif alarm == "true":
+      else:
           print("Alarm on")
           try:
               GPIO.add_event_detect(4, GPIO.RISING)
               GPIO.add_event_callback(4, alarm_callback)
           except RuntimeError:
               print("alarm is already on")
-      else:
-          print("invalid input")
 
 mqttClient = paho.mqtt.client.Client()  
 mqttClient.username_pw_set(mqttVhost + ":" + mqttUser, mqttPassword)  

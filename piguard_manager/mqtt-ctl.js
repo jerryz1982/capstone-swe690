@@ -1,6 +1,7 @@
 var mqtt = require('mqtt');
 var Agent = require('./db/models/agent.js');
 var Alarm = require('./db/models/alarm.js');
+var utils = require('./utils.js')
 var mqtt_host = 'hyena.rmq.cloudamqp.com' 
 var mqtt_port = '1883'
 var mqtt_user = 'dfwxdeyo'
@@ -14,32 +15,8 @@ var url  = 'mqtt://' + mqtt_host + ':' + mqtt_port;
 
 var controller = mqtt.connect(url, { username: mqtt_vhost + ":" + mqtt_user, password: mqtt_pass, clientId: 'mqtt-ctl', clean: true });
 
-var configfile = {"message": "hellow world!"}
+var configfile = {"message": "hello world!"}
 module.exports = { init: function() {
-
-function update_agent(deviceId, deviceMac, deviceIP) {
-
-   Agent.findOne({deviceid: deviceId}, null, function (err, agent) {
-      if( agent == null ) {
-        console.log('creating new agent');
-        newagent = new Agent( {
-          deviceid: deviceId,
-          mac: deviceMac,
-          ip: deviceIP,
-        } )
-        newagent.save()
-        controller.publish(mqtt_topic_config, JSON.stringify(configfile))
-      }
-      else {
-        console.log('updating agent');
-        Agent.update({deviceid: deviceId}, { $set: { mac: deviceMac, update_time: Date.now(), ip:deviceIP }}, function (err, agent) {
-          console.log('updated', agent)
-        });
-      }
-    });
-
-}
-
 
 controller.on('connect', function () {  
   controller.subscribe(mqtt_topic_data, { qos: 1 });
@@ -60,7 +37,7 @@ controller.on('message', function (topic, message) {
     deviceId = message.DeviceId
     deviceMac = message.MacAddr
     deviceIP = message.IPAddr
-    update_agent(deviceId, deviceMac, deviceIP)
+    utils.update_agent(deviceId, deviceMac, deviceIP, Date.now())
   }
 
   if (topic=="RPi/Data") {
@@ -89,6 +66,6 @@ controller.on('message', function (topic, message) {
 
   control_agent: function(message) {
     controller.publish(mqtt_topic_control, message)
-  }
+  },
 
 }

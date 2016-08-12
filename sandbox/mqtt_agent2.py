@@ -72,7 +72,11 @@ registryData = {}
 registryData["DeviceId"] = mqttDeviceId
 
 import netifaces
-mac_address = netifaces.ifaddresses('eth0')[netifaces.AF_LINK][0]["addr"]
+import netifaces
+default_gw_intf = netifaces.gateways()["default"][netifaces.AF_INET][1]
+default_gw_intf_ip = netifaces.ifaddresses(default_gw_intf)[netifaces.AF_INET][0]["addr"]
+registryData["IPAddr"] = default_gw_intf_ip
+mac_address = netifaces.ifaddresses(default_gw_intf)[netifaces.AF_LINK][0]["addr"]
 registryData["MacAddr"] = mac_address
 registryDataJson = json.dumps(registryData)
 
@@ -86,7 +90,7 @@ def main_loop():
       telemetryData["Timestamp"] = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]  
       telemetryData["Motion"] = "True"
       telemetryDataJson = json.dumps(telemetryData)  
-      mqttClient.publish(mqttTelemetryTopic, telemetryDataJson, 1) 
+      #mqttClient.publish(mqttTelemetryTopic, telemetryDataJson, 1) 
       time.sleep(sleepTime)
 
 

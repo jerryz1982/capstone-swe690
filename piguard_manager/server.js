@@ -9,10 +9,12 @@ var mqtt_ctl = require('./mqtt-ctl.js')
 var mongoose = require('./db/connect.js')
 var app = express();
 var bodyParser = require('body-parser')
+var spawn = require('child_process').spawn;
 var port = process.env.PORT || 8000;
 
 //set gui root dir
 app.use(express.static(__dirname + '/gui'));
+app.use(express.static(__dirname + '/gui/static'));
 
 // set the home page route
 app.get('/', function(req, res) {
@@ -58,6 +60,9 @@ app.put('/api/alarms/:id', api.updateAlarm);
 
 // Start mqtt controller
 mqtt_ctl.init();
+// Start agent watcher
+watcher = spawn('nodejs', ['agent_watcher.js'], { stdio: 'inherit' })
+
 
 // Start server
 app.listen(port, function() {
