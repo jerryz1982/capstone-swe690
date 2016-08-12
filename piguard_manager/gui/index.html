@@ -26,6 +26,7 @@
       <th>IP Address</th>
       <th>MAC Address</th>
       <th>Update Time</th>
+      <th>Status</th>
       <th>Arm/Disarm</th>
       <th>Alarms</th>
       </tr>
@@ -36,6 +37,7 @@
         <td data-title="IP Address">{{ agent.ip }}</td>
         <td data-title="MAC Address">{{ agent.mac }}</td>
         <td data-title="Update Time">{{ agent.update_time }}</td>
+        <td data-title="Status"><div ng-class="agentsctrlr.state[agent.deviceid]"></div></td>
         <td data-title="Arm/Disarm">
         <button ng-show="agent.alarm_on" ng-click='arm(agent.deviceid, false)'>Disarm</button>
         <button ng-hide="agent.alarm_on" ng-click='arm(agent.deviceid, true)'>Arm</button>
