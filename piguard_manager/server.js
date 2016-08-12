@@ -61,7 +61,8 @@ app.put('/api/alarms/:id', api.updateAlarm);
 // Start mqtt controller
 mqtt_ctl.init();
 // Start agent watcher
-watcher = spawn('nodejs', ['agent_watcher.js'], { stdio: 'inherit' })
+agent_watcher_path = __dirname + '/agent_watcher.js'
+watcher = spawn('node', [agent_watcher_path], { stdio: 'inherit' })
 
 
 // Start server
