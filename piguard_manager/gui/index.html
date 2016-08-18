@@ -61,7 +61,9 @@
             <th>Type</th>
             <th>Tweet URL</th>
             <th>Status</th>
-            <th>Actions</th>
+            <th>Actions
+                <button ng-click='agentsctrlr.alarms[agent.deviceid].forEach(del_alarm)'>Delete All</button>
+            </th>
           </tr>
           </thead>
           <tbody>
@@ -73,7 +75,7 @@
             <td data-title="Actions">
               <button ng-hide="alarm.state=='acknowledged'" ng-click='set_alarm(agent.deviceid,alarm._id,"acknowledged")'>Acknowledge</button>
               <button ng-show="alarm.state=='acknowledged'" ng-click='set_alarm(agent.deviceid,alarm._id,"active")'>Unacknowledge</button>
-              <button ng-click='del_alarm(agent.deviceid,alarm._id)'>Delete</button>
+              <button ng-click='del_alarm(alarm)'>Delete</button>
             </td>
           </tr>
           </tbody>

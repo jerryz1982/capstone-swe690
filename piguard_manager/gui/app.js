@@ -66,11 +66,12 @@
       });
     }
 
-    $scope.del_alarm = function(deviceid, alarmid) {
-      $http.delete( api_url + '/alarms/' + alarmid, config).success(function() {
-        $scope.getAlarms(deviceid)
+    $scope.del_alarm = function(alarm) {
+      $http.delete( api_url + '/alarms/' + alarm._id, config).success(function() {
+        $scope.getAlarms(alarm.deviceid)
       });
     }
+
     $scope.getAgents()
     $interval(function() {
       $scope.getAgents()

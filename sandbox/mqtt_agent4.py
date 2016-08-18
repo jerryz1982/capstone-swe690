@@ -95,8 +95,8 @@ def on_message(client, userdata, message):
           try:
               GPIO.add_event_detect(pir_pin, GPIO.RISING)
               GPIO.add_event_detect(door_pin, GPIO.RISING)
-              GPIO.add_event_callback(pir_pin, motion_alarm_callback)
-              GPIO.add_event_callback(door_pin, door_alarm_callback)
+              GPIO.add_event_callback(pir_pin, alarm_callback)
+              GPIO.add_event_callback(door_pin, alarm_callback)
           except RuntimeError:
               print("alarm is already on")
 
