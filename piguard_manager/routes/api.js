@@ -61,7 +61,7 @@ exports.deleteAlarm = function (req, res) {
   var id = req.params.id;
   alarm = Alarm.findOne({'_id': id}, function(err, alarm) {
     var control_message = {};
-    if (alarm.length == 1) {
+    if (alarm) {
       if (alarm[0]["tweet_id"]) {
         control_message["deviceid"] = alarm[0]["deviceid"];
         control_message["delete"] = alarm[0]["tweet_id"];
