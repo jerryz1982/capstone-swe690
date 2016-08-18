@@ -5,8 +5,10 @@ import time
 import RPi.GPIO as GPIO
 import tweepy
 from picamera import PiCamera
+from picamera import exc as cam_exception
 import os
 
+from tweepy.error import TweepError
 
 sleepTime = 10
 deviceid = "Raspberry-Pi:Prototype"
@@ -20,7 +22,13 @@ ACCESS_SECRET = 'fqC2YW55dHJYglWJWdoJBMBr5Omtv7kY5fKMIv5y2yokJ'#keep the quotes,
 auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
 api = tweepy.API(auth)
-camera = PiCamera()
+
+def init_camera():
+    try:
+        global camera
+        camera = PiCamera()
+    except cam_exception.PiCameraError:
+        print("camera not enabled")
 
 
 
@@ -35,10 +43,16 @@ mqttTelemetryTopic = "RPi.Data"
 mqttControlTopic = "RPi.Control"
 mqttRegisterTopic = "RPi.Register"
 mqttConfigTopic = "RPi.Config"
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(17, GPIO.OUT)
-GPIO.setup(4, GPIO.IN)
 
+# GPIO pins
+door_pin = 27
+pir_pin = 4
+alert_pin = 17
+
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(alert_pin, GPIO.OUT)
+GPIO.setup(pir_pin, GPIO.IN)
+GPIO.setup(door_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 
 # Callback methods  
@@ -61,22 +75,30 @@ def on_message(client, userdata, message):
     message_json = json.loads(message.payload)
     if message_json["deviceid"].lower() != mqttDeviceId.lower():
       print("not for me, move on")
-      pass
+      return
     print("Received message " + str(message.payload) + " on topic " + message.topic)
-    alarm = message_json["alarm_on"].lower()
-    if alarm == "false":
-        print("Alarm off")
-        GPIO.remove_event_detect(4)
-        GPIO.output(17, False)
-    elif alarm == "true":
-        print("Alarm on")
-        try:
-            GPIO.add_event_detect(4, GPIO.RISING)
-            GPIO.add_event_callback(4, alarm_callback)
-        except RuntimeError:
-            print("alarm is already on")
-    else:
-        print("invalid input")
+    if 'delete' in message_json:
+      try:
+        api.destroy_status(message_json["delete"])
+        print("tweet deleted")
+      except TweepError:
+        print("tweet doesn't exist")
+    if 'alarm_on' in message_json:
+      alarm = message_json["alarm_on"]
+      if not alarm:
+          print("Alarm off")
+          GPIO.remove_event_detect(pir_pin)
+          GPIO.remove_event_detect(door_pin)
+          GPIO.output(alert_pin, False)
+      else:
+          print("Alarm on")
+          try:
+              GPIO.add_event_detect(pir_pin, GPIO.RISING)
+              GPIO.add_event_detect(door_pin, GPIO.RISING)
+              GPIO.add_event_callback(pir_pin, alarm_callback)
+              GPIO.add_event_callback(door_pin, alarm_callback)
+          except RuntimeError:
+              print("alarm is already on")
 
 mqttClient = paho.mqtt.client.Client()  
 mqttClient.username_pw_set(mqttVhost + ":" + mqttUser, mqttPassword)  
@@ -107,25 +129,46 @@ registryDataJson = json.dumps(registryData)
 
 def alarm_callback(channel, deviceid=deviceid):
     timestamp = time.strftime("%y%m%d_%H%M%S")
-    filename = "".join(["/tmp/pic", timestamp, ".jpg"])
-    camera.capture(filename)
-    message = "Motion Detected at " + timestamp + " by " + str(deviceid)
-    api.update_with_media(filename, status=message + " @xyzjerry #motion5493")
-    os.remove(filename)
 
+    if channel == pir_pin:
+        alarm_type = "motion"
+        filename = "".join(["/tmp/pic", timestamp, ".jpg"])
+        camera.capture(filename)
+        message = "#" + alarm_type + "5493 Detected at " + timestamp + " by " + deviceid
+        try:
+            tweet = api.update_with_media(filename, status=message + " @xyzjerry")
+        except:
+            tweet = None
+        os.remove(filename)
+    if channel == door_pin:
+        if GPIO.input(channel):
+            alarm_type = "door"
+            message = "#" + alarm_type + "5493 Detected at " + timestamp + " by " + deviceid + " @xyzjerry"
+            try:
+                tweet = api.update_status(message)
+            except:
+                tweet = None
+        else:
+            return
+    print(message)
     telemetryData = {}
     telemetryData["DeviceId"] = deviceid
-#    telemetryData["Timestamp"] = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
     telemetryData["Timestamp"] = timestamp
-    telemetryData["Motion"] = "True"
-    telemetryDataJson = json.dumps(telemetryData)  
-    mqttClient.publish(mqttTelemetryTopic, telemetryDataJson, 1) 
-    GPIO.output(17, True)
+    telemetryData["Type"] = alarm_type
+    if tweet:
+        telemetryData["Tweet_id"] = str(tweet.id)
+        telemetryData["Tweet_url"] = "https://twitter.com/" + tweet._json["user"]["screen_name"] + "/statuses/" + telemetryData["Tweet_id"]
+    telemetryDataJson = json.dumps(telemetryData)
+    mqttClient.publish(mqttTelemetryTopic, telemetryDataJson, 1)
+    GPIO.output(alert_pin, True)
 
 def main_loop(sleep=sleepTime):
+    init_camera()
     # set initial event detect
-    GPIO.add_event_detect(4, GPIO.RISING)
-    GPIO.add_event_callback(4, alarm_callback)
+    GPIO.add_event_detect(pir_pin, GPIO.RISING)
+    GPIO.add_event_detect(door_pin, GPIO.RISING)
+    GPIO.add_event_callback(pir_pin, alarm_callback)
+    GPIO.add_event_callback(door_pin, alarm_callback)
     while True:
         mqttClient.publish(mqttRegisterTopic, registryDataJson, 0)
         time.sleep(sleep)

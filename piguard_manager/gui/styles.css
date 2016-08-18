@@ -1,0 +1,78 @@
+@media only screen and (max-width: 800px) {
+	/* Force table to not be like tables anymore */
+        #no-more-tables caption,
+	#no-more-tables table, 
+	#no-more-tables thead, 
+	#no-more-tables tbody, 
+	#no-more-tables th, 
+	#no-more-tables td, 
+	#no-more-tables tr { 
+		display: block;
+                text-align: center; 
+	}
+ 
+	/* Hide table headers (but not display: none;, for accessibility) */
+	#no-more-tables thead tr { 
+		position: absolute;
+		top: -9999px;
+		left: -9999px;
+	}
+ 
+	#no-more-tables tr { border: 1px solid #ccc; }
+ 
+	#no-more-tables td { 
+		/* Behave  like a "row" */
+		border: none;
+		border-bottom: 1px solid #eee; 
+		position: relative;
+		padding-left: 25%; 
+		white-space: normal;
+                font-size: 0.8em;
+	}
+ 
+	#no-more-tables td:before { 
+		/* Now like a table header */
+		position: absolute;
+		/* Top/left values mimic padding */
+		top: 6px;
+		left: 6px;
+		width: 30%; 
+		padding-right: 10px; 
+		white-space: nowrap;
+		font-weight: bold;
+                font-size: 0.8em;
+	}
+ 
+	/*
+	Label the data
+	*/
+	#no-more-tables td:before { content: attr(data-title); }
+}
+
+tr { border: 1px solid #ccc; }
+th,td {
+        padding: 0.6em;
+        text-align: center;
+   }
+
+.red { background-color: red }
+.orange { background-color: orange }
+.green { background-color: green }
+
+.led-green {
+  margin: 0 auto;
+  width: 24px;
+  height: 24px;
+  background-color: #ABFF00;
+  border-radius: 50%;
+  box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #304701 0 -1px 9px, #89FF00 0 2px 12px;
+}
+
+.led-gray {
+  margin: 0 auto;
+  width: 24px;
+  height: 24px;
+  background-color: gray;
+  border-radius: 50%;
+  box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset lightgray 0 -1px 9px, #9EA4A4 0 2px 12px;
+}

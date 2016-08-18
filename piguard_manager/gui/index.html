@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html ng-app="piguard">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="styles.css" />
+    <style>
+      caption {
+        color: darkgray;
+        font-size: 1.6em;
+        font-weight: bold;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div ng-include="'nav.htm'"></div>
+    <div id="no-more-tables">
+    <div class="container page">
+    <div class="content" ng-controller="AgentsController as agentsctrlr">
+      <table cellpadding="0">
+      <caption>Dashboard</caption>
+      <thead>
+      <tr>
+      <th>Device ID</th>
+      <th>IP Address</th>
+      <th>MAC Address</th>
+      <th>Update Time</th>
+      <th>Status</th>
+      <th>Arm/Disarm</th>
+      <th>Alarms</th>
+      </tr>
+      </thead>
+      </tbody>
+      <tr ng-repeat-start="agent in agentsctrlr.items | orderBy:'-deviceid'">
+        <td data-title="Device ID"> {{ agent.deviceid }}</td>
+        <td data-title="IP Address">{{ agent.ip }}</td>
+        <td data-title="MAC Address">{{ agent.mac }}</td>
+        <td data-title="Update Time">{{ agent.update_time }}</td>
+        <td data-title="Status"><div ng-class="agentsctrlr.state[agent.deviceid]"></div></td>
+        <td data-title="Arm/Disarm">
+        <button ng-show="agent.alarm_on" ng-click='arm(agent.deviceid, false)'>Disarm</button>
+        <button ng-hide="agent.alarm_on" ng-click='arm(agent.deviceid, true)'>Arm</button>
+        </td>
+        <td data-title="Alarms">
+          <button ng-class="agentsctrlr.color[agent.deviceid]"
+                  ng-if="agentsctrlr.expanded[agent.deviceid]"
+                  ng-click="agentsctrlr.expanded[agent.deviceid] = false">-</button>
+          <button ng-class="agentsctrlr.color[agent.deviceid]"
+                  ng-if="!agentsctrlr.expanded[agent.deviceid]"
+                  ng-click="agentsctrlr.expanded[agent.deviceid] = true; getAlarms(agent.deviceid)">+</button>
+        </td>
+      </tr>
+      <tr ng-if="agentsctrlr.expanded[agent.deviceid]" ng-repeat-end>
+        <td colspan="6">
+          <table cellpadding=0 ng-show="agentsctrlr.alarms[agent.deviceid].length">
+          <caption>Alarms</caption>
+          <thead>
+          <tr>
+            <th>Time</th>
+            <th>Type</th>
+            <th>Tweet URL</th>
+            <th>Status</th>
+            <th>Actions
+                <button ng-click='agentsctrlr.alarms[agent.deviceid].forEach(del_alarm)'>Delete All</button>
+            </th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr ng-repeat="alarm in agentsctrlr.alarms[agent.deviceid] | orderBy:'-time'">
+            <td data-title="Time">{{ alarm.time }}</td>
+            <td data-title="Type">{{ alarm.type }}</td>
+            <td data-title="Tweet URL"><a href="{{ alarm.tweet_url }}" target="_blank">{{ alarm.tweet_id }}</a></td>
+            <td data-title="Status">{{ alarm.state }}</td>
+            <td data-title="Actions">
+              <button ng-hide="alarm.state=='acknowledged'" ng-click='set_alarm(agent.deviceid,alarm._id,"acknowledged")'>Acknowledge</button>
+              <button ng-show="alarm.state=='acknowledged'" ng-click='set_alarm(agent.deviceid,alarm._id,"active")'>Unacknowledge</button>
+              <button ng-click='del_alarm(alarm)'>Delete</button>
+            </td>
+          </tr>
+          </tbody>
+          </table>
+        </td>
+      </tr>
+      </tbody>
+      </table>
+    </div>
+    </div>
+    </div>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+    <script type="text/javascript" src="app.js"></script>
+  </body>
+</html>

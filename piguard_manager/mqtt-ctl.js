@@ -1,6 +1,7 @@
 var mqtt = require('mqtt');
-var mongoose = require('mongoose');
 var Agent = require('./db/models/agent.js');
+var Alarm = require('./db/models/alarm.js');
+var utils = require('./utils.js')
 var mqtt_host = 'hyena.rmq.cloudamqp.com' 
 var mqtt_port = '1883'
 var mqtt_user = 'dfwxdeyo'
@@ -14,56 +15,57 @@ var url  = 'mqtt://' + mqtt_host + ':' + mqtt_port;
 
 var controller = mqtt.connect(url, { username: mqtt_vhost + ":" + mqtt_user, password: mqtt_pass, clientId: 'mqtt-ctl', clean: true });
 
-var configfile = {"message": "hellow world!"}
-//mongoose.connect('mongodb://rpi:swe690@ds015924.mlab.com:15924/piguard');
+var configfile = {"message": "hello world!"}
 module.exports = { init: function() {
-
-function update_agent(deviceId, deviceMac, deviceIP) {
-
-   Agent.findOne({deviceid: deviceId}, null, function (err, agent) {
-      if( agent == null ) {
-        console.log('creating new agent');
-        newagent = new Agent( {
-          deviceid: deviceId,
-          mac: deviceMac,
-          ip: deviceIP,
-        } )
-        newagent.save()
-        controller.publish(mqtt_topic_config, JSON.stringify(configfile))
-      }
-      else {
-        console.log('updating agent');
-        Agent.update({deviceid: deviceId}, { $set: { mac: deviceMac, update_time: Date.now(), ip:deviceIP }}, function (err, agent) {
-          console.log('updated', agent)
-        });
-      }
-    });
-
-}
-
 
 controller.on('connect', function () {  
   controller.subscribe(mqtt_topic_data, { qos: 1 });
   controller.subscribe(mqtt_topic_register, { qos: 1 });
 });
 
+controller.on('error', function(err) {
+  console.log('mqtt error occurred: ' + err)
+});
+
 controller.on('message', function (topic, message) {
   messageStr = message.toString()
   console.log('received message ',  messageStr, topic);
+  message = JSON.parse(messageStr)
+
   if (topic=="RPi/Register") {
-    message = JSON.parse(messageStr)
     console.log('registering agent in db', message.MacAddr)
     deviceId = message.DeviceId
     deviceMac = message.MacAddr
     deviceIP = message.IPAddr
-    update_agent(deviceId, deviceMac, deviceIP)
+    utils.update_agent(deviceId, deviceMac, deviceIP, Date.now())
   }
+
+  if (topic=="RPi/Data") {
+    console.log('saving alarm', message)
+    newalarm = new Alarm ({
+      tweet_id: message.Tweet_id,
+      tweet_url: message.Tweet_url,
+      type: message.Type,
+      time: message.Timestamp,
+      deviceid: message.DeviceId,
+      state: "active"
+    }, function(err) {
+        if (err) {
+          console.log('error creating alarm')
+        } else {
+          console.log('alarm created')
+        }
+      } 
+    );
+    newalarm.save()
+  }
+
 });
 
 },
 
   control_agent: function(message) {
     controller.publish(mqtt_topic_control, message)
-  }
+  },
 
 }
