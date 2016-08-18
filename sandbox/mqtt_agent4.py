@@ -135,23 +135,29 @@ def alarm_callback(channel, deviceid=deviceid):
         filename = "".join(["/tmp/pic", timestamp, ".jpg"])
         camera.capture(filename)
         message = "#" + alarm_type + "5493 Detected at " + timestamp + " by " + deviceid
-        tweet = api.update_with_media(filename, status=message + " @xyzjerry")
+        try:
+            tweet = api.update_with_media(filename, status=message + " @xyzjerry")
+        except:
+            tweet = None
         os.remove(filename)
     if channel == door_pin:
         if GPIO.input(channel):
             alarm_type = "door"
             message = "#" + alarm_type + "5493 Detected at " + timestamp + " by " + deviceid + " @xyzjerry"
-            tweet = api.update_status(message)
+            try:
+                tweet = api.update_status(message)
+            except:
+                tweet = None
         else:
             return
     print(message)
     telemetryData = {}
     telemetryData["DeviceId"] = deviceid
-#    telemetryData["Timestamp"] = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
     telemetryData["Timestamp"] = timestamp
     telemetryData["Type"] = alarm_type
-    telemetryData["Tweet_id"] = str(tweet.id)
-    telemetryData["Tweet_url"] = "https://twitter.com/statuses/" + telemetryData["Tweet_id"]
+    if tweet:
+        telemetryData["Tweet_id"] = str(tweet.id)
+        telemetryData["Tweet_url"] = "https://twitter.com/" + tweet._json["user"]["screen_name"] + "/statuses/" + telemetryData["Tweet_id"]
     telemetryDataJson = json.dumps(telemetryData)
     mqttClient.publish(mqttTelemetryTopic, telemetryDataJson, 1)
     GPIO.output(alert_pin, True)

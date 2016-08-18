@@ -59,13 +59,15 @@ exports.deleteAgent = function (req, res) {
 
 exports.deleteAlarm = function (req, res) {
   var id = req.params.id;
-  alarm = Alarm.find({'tweet_id': id}, function(err, alarm) {
+  alarm = Alarm.findOne({'_id': id}, function(err, alarm) {
     var control_message = {};
     if (alarm.length == 1) {
-      control_message["deviceid"] = alarm[0]["deviceid"];
-      control_message["delete"] = alarm[0]["tweet_id"];
-      mqtt_ctl.control_agent(JSON.stringify(control_message))
-      Alarm.remove({'tweet_id': id}, function(err) {
+      if (alarm[0]["tweet_id"]) {
+        control_message["deviceid"] = alarm[0]["deviceid"];
+        control_message["delete"] = alarm[0]["tweet_id"];
+        mqtt_ctl.control_agent(JSON.stringify(control_message))
+      }
+      Alarm.remove({'_id': id}, function(err) {
         if (!err) {
           res.send('{"status": "ok"}')
         } else {
@@ -102,7 +104,7 @@ exports.updateAgent = function (req, res) {
 
 exports.updateAlarm = function (req, res) {
   console.log('Updating alarm');
-  Alarm.update({tweet_id: req.params.id}, {
+  Alarm.update({_id: req.params.id}, {
     state: req.body["state"],
   }, function(err) {
       if(!err) {
