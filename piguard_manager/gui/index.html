@@ -65,10 +65,10 @@
           </tr>
           </thead>
           <tbody>
-          <tr ng-repeat="alarm in agentsctrlr.alarms[agent.deviceid] | orderBy:'time'">
+          <tr ng-repeat="alarm in agentsctrlr.alarms[agent.deviceid] | orderBy:'-time'">
             <td data-title="Time">{{ alarm.time }}</td>
             <td data-title="Type">{{ alarm.type }}</td>
-            <td data-title="Tweet URL"><a href="{{ alarm.tweet_url }}" target="_blank">{{ alarm.tweet_url }}</a></td>
+            <td data-title="Tweet URL"><a href="{{ alarm.tweet_url }}" target="_blank">{{ alarm.tweet_id }}</a></td>
             <td data-title="Status">{{ alarm.state }}</td>
             <td data-title="Actions">
               <button ng-hide="alarm.state=='acknowledged'" ng-click='set_alarm(agent.deviceid,alarm.tweet_id,"acknowledged")'>Acknowledge</button>
