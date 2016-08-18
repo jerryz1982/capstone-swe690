@@ -62,9 +62,9 @@ exports.deleteAlarm = function (req, res) {
   alarm = Alarm.findOne({'_id': id}, function(err, alarm) {
     var control_message = {};
     if (alarm) {
-      if (alarm[0]["tweet_id"]) {
-        control_message["deviceid"] = alarm[0]["deviceid"];
-        control_message["delete"] = alarm[0]["tweet_id"];
+      if (alarm["tweet_id"]) {
+        control_message["deviceid"] = alarm["deviceid"];
+        control_message["delete"] = alarm["tweet_id"];
         mqtt_ctl.control_agent(JSON.stringify(control_message))
       }
       Alarm.remove({'_id': id}, function(err) {
