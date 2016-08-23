@@ -30,6 +30,7 @@ module.exports = { update_agent:
             state = "online"
           }
         } else {
+          console.log("agent back online")
           update_time = updateTime
           state = "online"
         }
@@ -40,6 +41,16 @@ module.exports = { update_agent:
         });
       }
     });
-}
+},
 
+  find_agent: function(deviceid, callback) {
+    Agent.findOne({deviceid: deviceid}, null, function(err, agent) {
+      if(!err) {
+        console.log("agent is found", agent.deviceid)
+        return callback(agent)
+      } else {
+        console.log("error finding agent")
+      }
+    })
+  }
 }

@@ -15,7 +15,10 @@ var url  = 'mqtt://' + mqtt_host + ':' + mqtt_port;
 
 var controller = mqtt.connect(url, { username: mqtt_vhost + ":" + mqtt_user, password: mqtt_pass, clientId: 'mqtt-ctl', clean: true });
 
-var configfile = {"message": "hello world!"}
+var config = {}
+
+var twitter_handles = [ "xyzjerry" ]
+
 module.exports = { init: function() {
 
 controller.on('connect', function () {  
@@ -38,6 +41,15 @@ controller.on('message', function (topic, message) {
     deviceMac = message.MacAddr
     deviceIP = message.IPAddr
     utils.update_agent(deviceId, deviceMac, deviceIP, Date.now())
+    utils.find_agent(deviceId, function(agent) {
+      if(agent != null) {
+        config["deviceid"] = deviceId
+        config["alarm_on"] = agent.alarm_on
+        config["twitter_handles"] = twitter_handles
+        console.log("sending config for agent")
+        controller.publish(mqtt_topic_config, JSON.stringify(config))
+      }
+    })
   }
 
   if (topic=="RPi/Data") {

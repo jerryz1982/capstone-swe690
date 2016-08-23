@@ -32,28 +32,26 @@
       </tr>
       </thead>
       </tbody>
-      <tr ng-repeat-start="agent in agentsctrlr.items | orderBy:'-deviceid'">
+      <tr ng-repeat-start="agent in agentsctrlr.items | orderBy:'-deviceid'"
+          ng-click="agentsctrlr[agent.deviceid].expanded = !agentsctrlr[agent.deviceid].expanded; getAlarms(agent.deviceid)">
         <td data-title="Device ID"> {{ agent.deviceid }}</td>
         <td data-title="IP Address">{{ agent.ip }}</td>
         <td data-title="MAC Address">{{ agent.mac }}</td>
         <td data-title="Update Time">{{ agent.update_time }}</td>
-        <td data-title="Status"><div ng-class="agentsctrlr.state[agent.deviceid]"></div></td>
+        <td data-title="Status"><div ng-class="agentsctrlr[agent.deviceid].state"></div></td>
         <td data-title="Arm/Disarm">
-        <button ng-show="agent.alarm_on" ng-click='arm(agent.deviceid, false)'>Disarm</button>
-        <button ng-hide="agent.alarm_on" ng-click='arm(agent.deviceid, true)'>Arm</button>
+        <button ng-show="agent.alarm_on" ng-click='arm(agent.deviceid, false); $event.stopPropagation()'>Disarm</button>
+        <button ng-hide="agent.alarm_on" ng-click='arm(agent.deviceid, true); $event.stopPropagation()'>Arm</button>
         </td>
         <td data-title="Alarms">
-          <button ng-class="agentsctrlr.color[agent.deviceid]"
-                  ng-if="agentsctrlr.expanded[agent.deviceid]"
-                  ng-click="agentsctrlr.expanded[agent.deviceid] = false">-</button>
-          <button ng-class="agentsctrlr.color[agent.deviceid]"
-                  ng-if="!agentsctrlr.expanded[agent.deviceid]"
-                  ng-click="agentsctrlr.expanded[agent.deviceid] = true; getAlarms(agent.deviceid)">+</button>
+          <span ng-class="agentsctrlr[agent.deviceid].color">
+            {{ agentsctrlr[agent.deviceid].alarm_count }}
+          </span>
         </td>
       </tr>
-      <tr ng-if="agentsctrlr.expanded[agent.deviceid]" ng-repeat-end>
+      <tr ng-if="agentsctrlr[agent.deviceid].expanded" ng-repeat-end>
         <td colspan="6">
-          <table cellpadding=0 ng-show="agentsctrlr.alarms[agent.deviceid].length">
+          <table cellpadding=0 ng-show="agentsctrlr[agent.deviceid].alarms.length">
           <caption>Alarms</caption>
           <thead>
           <tr>
@@ -62,12 +60,12 @@
             <th>Tweet URL</th>
             <th>Status</th>
             <th>Actions
-                <button ng-click='agentsctrlr.alarms[agent.deviceid].forEach(del_alarm)'>Delete All</button>
+                <button ng-click='agentsctrlr[agent.deviceid].alarms.forEach(del_alarm)'>Delete All</button>
             </th>
           </tr>
           </thead>
           <tbody>
-          <tr ng-repeat="alarm in agentsctrlr.alarms[agent.deviceid] | orderBy:'-time'">
+          <tr ng-repeat="alarm in agentsctrlr[agent.deviceid].alarms | orderBy:'-time'">
             <td data-title="Time">{{ alarm.time }}</td>
             <td data-title="Type">{{ alarm.type }}</td>
             <td data-title="Tweet URL"><a href="{{ alarm.tweet_url }}" target="_blank">{{ alarm.tweet_id }}</a></td>

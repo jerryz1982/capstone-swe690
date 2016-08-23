@@ -13,6 +13,12 @@ from tweepy.error import TweepError
 sleepTime = 10
 deviceid = "Raspberry-Pi:Prototype"
 
+class AgentConfig(object):
+    def __init__(self):
+        self.twitter_handles = ""
+        self.hashtags = ""
+
+config = AgentConfig()
 
 #enter the corresponding information from your Twitter application:
 CONSUMER_KEY = 'pEqk36xG4exYbEse25SSIUJcv'#keep the quotes, replace this with your consumer key
@@ -22,6 +28,7 @@ ACCESS_SECRET = 'fqC2YW55dHJYglWJWdoJBMBr5Omtv7kY5fKMIv5y2yokJ'#keep the quotes,
 auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
 api = tweepy.API(auth)
+
 
 def init_camera():
     try:
@@ -83,6 +90,10 @@ def on_message(client, userdata, message):
         print("tweet deleted")
       except TweepError:
         print("tweet doesn't exist")
+    if 'twitter_handles' in message_json:
+        at = ' @'
+        print message_json["twitter_handles"]
+        config.twitter_handles = at.join(message_json["twitter_handles"])
     if 'alarm_on' in message_json:
       alarm = message_json["alarm_on"]
       if not alarm:
@@ -114,7 +125,7 @@ mqttClient.connect(mqttBrokerHost, mqttBrokerPort, 60)
 mqttClient.loop_start()  
 # Collect telemetry information from Sense HAT and publish to MQTT broker in JSON format  
 mqttClient.subscribe(mqttControlTopic, 1)
-
+mqttClient.subscribe(mqttConfigTopic, 1)
 registryData = {}
 registryData["DeviceId"] = mqttDeviceId
 
@@ -129,21 +140,20 @@ registryDataJson = json.dumps(registryData)
 
 def alarm_callback(channel, deviceid=deviceid):
     timestamp = time.strftime("%y%m%d_%H%M%S")
-
     if channel == pir_pin:
         alarm_type = "motion"
         filename = "".join(["/tmp/pic", timestamp, ".jpg"])
         camera.capture(filename)
-        message = "#" + alarm_type + "5493 Detected at " + timestamp + " by " + deviceid
+        message = "#" + alarm_type + "5493 Detected at " + timestamp + " by #" + deviceid + " @" + config.twitter_handles
         try:
-            tweet = api.update_with_media(filename, status=message + " @xyzjerry")
+            tweet = api.update_with_media(filename, status=message)
         except:
             tweet = None
         os.remove(filename)
     if channel == door_pin:
         if GPIO.input(channel):
             alarm_type = "door"
-            message = "#" + alarm_type + "5493 Detected at " + timestamp + " by " + deviceid + " @xyzjerry"
+            message = "#" + alarm_type + "5493 Detected at " + timestamp + " by #" + deviceid + " @" + config.twitter_handles
             try:
                 tweet = api.update_status(message)
             except:
@@ -164,11 +174,6 @@ def alarm_callback(channel, deviceid=deviceid):
 
 def main_loop(sleep=sleepTime):
     init_camera()
-    # set initial event detect
-    GPIO.add_event_detect(pir_pin, GPIO.RISING)
-    GPIO.add_event_detect(door_pin, GPIO.RISING)
-    GPIO.add_event_callback(pir_pin, alarm_callback)
-    GPIO.add_event_callback(door_pin, alarm_callback)
     while True:
         mqttClient.publish(mqttRegisterTopic, registryDataJson, 0)
         time.sleep(sleep)

@@ -9,10 +9,16 @@
           'Content-Type': 'application/json'
       }
     }
-    agents.alarms = {}
-    agents.color = {}
-    agents.state = {}
-    agents.expanded = {}
+
+    $http.get( api_url + '/agents').success(function(agents_data) {
+      agents_data.forEach(function(agent) {
+        agents[agent.deviceid] = {}
+        agents[agent.deviceid].expanded = false
+        $scope.getAgentcolor(agent.deviceid)
+      })
+      agents.items = agents_data;
+    });
+
     $scope.arm = function(deviceid, on) {
       var json_data = {
         alarm_on: on
@@ -33,27 +39,28 @@
 
     $scope.getAgentcolor = function(deviceid) {
       $http.get( api_url + '/agents/' + deviceid ).success(function(agent_data) {
+        agents[deviceid]['alarm_count'] = agent_data.alarm_count
         if (agent_data.alarm_count>0 && agent_data.alarm_count<10) {
-           agents.color[deviceid] = "orange"
+           agents[deviceid]['color'] = "orange"
         }
         if (agent_data.alarm_count==0) {
-           agents.color[deviceid] = "green"
+           agents[deviceid]['color'] = "green"
         }
         if (agent_data.alarm_count>=10) {
-           agents.color[deviceid] = "red"
+           agents[deviceid]['color'] = "red"
         }
         if (agent_data.state == "online") {
-           agents.state[deviceid] = "led-green"
+           agents[deviceid].state = "led-green"
         }
         if (agent_data.state == "offline") {
-           agents.state[deviceid] = "led-gray"
+           agents[deviceid].state = "led-gray"
         }
       })
     }
 
     $scope.getAlarms = function(deviceid) {
       $http.get( api_url + '/alarms?deviceid=' + deviceid).success(function(alarms_data) {
-        agents.alarms[deviceid] = alarms_data
+        agents[deviceid].alarms = alarms_data
     });
     }
 
@@ -72,7 +79,6 @@
       });
     }
 
-    $scope.getAgents()
     $interval(function() {
       $scope.getAgents()
     }, 5000);
