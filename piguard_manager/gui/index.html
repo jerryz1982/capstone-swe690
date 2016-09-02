@@ -38,7 +38,7 @@
         <td data-title="IP Address">{{ agent.ip }}</td>
         <td data-title="MAC Address">{{ agent.mac }}</td>
         <td data-title="Update Time">{{ agent.update_time }}</td>
-        <td data-title="Status"><div ng-class="agentsctrlr[agent.deviceid].state"></div></td>
+        <td data-title="Status"><div ng-class="agentsctrlr[agent.deviceid].state" title="{{ agent.state }}"></div></td>
         <td data-title="Arm/Disarm">
         <button ng-show="agent.alarm_on" ng-click='arm(agent.deviceid, false); $event.stopPropagation()'>Disarm</button>
         <button ng-hide="agent.alarm_on" ng-click='arm(agent.deviceid, true); $event.stopPropagation()'>Arm</button>
