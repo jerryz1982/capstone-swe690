@@ -1,0 +1,71 @@
+    <div id="no-more-tables">
+    <div class="container page">
+    <div class="content" ng-controller="AgentsController as agentsctrlr">
+      <table cellpadding="0">
+      <caption>Dashboard</caption>
+      <thead>
+      <tr>
+      <th>Device ID</th>
+      <th>IP Address</th>
+      <th>MAC Address</th>
+      <th>Update Time</th>
+      <th>Status</th>
+      <th>Arm/Disarm</th>
+      <th>Alarms</th>
+      </tr>
+      </thead>
+      </tbody>
+      <tr ng-repeat-start="agent in agentsctrlr.items | orderBy:'-deviceid'"
+          ng-click="agentsctrlr[agent.deviceid].expanded = !agentsctrlr[agent.deviceid].expanded; getAlarms(agent.deviceid)">
+        <td data-title="Device ID"> {{ agent.deviceid }}</td>
+        <td data-title="IP Address">{{ agent.ip }}</td>
+        <td data-title="MAC Address">{{ agent.mac }}</td>
+        <td data-title="Update Time">{{ agent.update_time }}</td>
+        <td data-title="Status"><div ng-class="agentsctrlr[agent.deviceid].state" title="{{ agent.state }}"></div></td>
+        <td data-title="Arm/Disarm">
+        <button ng-show="agent.alarm_on" ng-click='arm(agent.deviceid, false); $event.stopPropagation()'>Disarm</button>
+        <button ng-hide="agent.alarm_on" ng-click='arm(agent.deviceid, true); $event.stopPropagation()'>Arm</button>
+        </td>
+        <td data-title="Alarms">
+          <span ng-class="agentsctrlr[agent.deviceid].color">
+            {{ agentsctrlr[agent.deviceid].alarm_count }}
+          </span>
+        </td>
+      </tr>
+      <tr ng-if="agentsctrlr[agent.deviceid].expanded" ng-repeat-end>
+        <td colspan="6">
+          <table cellpadding=0 ng-show="agentsctrlr[agent.deviceid].alarms.length">
+          <caption>Alarms</caption>
+          <thead>
+          <tr>
+            <th>Time</th>
+            <th>Type</th>
+            <th>Tweet URL</th>
+            <th>Status</th>
+            <th>Actions
+                <button ng-click='agentsctrlr[agent.deviceid].alarms.forEach(del_alarm)'>Delete All</button>
+            </th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr ng-repeat="alarm in agentsctrlr[agent.deviceid].alarms | orderBy:'-time'">
+            <td data-title="Time">{{ alarm.time }}</td>
+            <td data-title="Type">{{ alarm.type }}</td>
+            <td data-title="Tweet URL"><a href="{{ alarm.tweet_url }}" target="_blank">{{ alarm.tweet_id }}</a></td>
+            <td data-title="Status">{{ alarm.state }}</td>
+            <td data-title="Actions">
+              <button ng-hide="alarm.state=='acknowledged'" ng-click='set_alarm(agent.deviceid,alarm._id,"acknowledged")'>Acknowledge</button>
+              <button ng-show="alarm.state=='acknowledged'" ng-click='set_alarm(agent.deviceid,alarm._id,"active")'>Unacknowledge</button>
+              <button ng-click='del_alarm(alarm)'>Delete</button>
+            </td>
+          </tr>
+          </tbody>
+          </table>
+        </td>
+      </tr>
+      </tbody>
+      </table>
+    </div>
+    </div>
+    </div>
+    </div>
