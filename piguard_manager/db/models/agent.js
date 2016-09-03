@@ -9,6 +9,7 @@ var AgentSchema = new mongoose.Schema({
   update_time: {type: Date, default: Date.now},
   state: String,
   alarm_on: Boolean,
+  rebooted: Boolean,
 });
 
 

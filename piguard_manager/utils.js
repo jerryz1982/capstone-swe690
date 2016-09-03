@@ -11,6 +11,7 @@ module.exports = { update_agent:
           ip: deviceIP,
           update_time: updateTime,
           state: "online",
+          rebooted: false
         } )
         newagent.save()
         //controller.publish(mqtt_topic_config, JSON.stringify(configfile))
@@ -24,19 +25,21 @@ module.exports = { update_agent:
           last_update = agent.update_time.getTime()
           update_time = last_update
           diff = newtime - last_update
-          if( diff > 120000 ) {
+          if( diff > 60000 ) {
             state = "offline"
+            rebooted = true
           } else {
-            state = "online"
+            state = agent.state
+            rebooted = agent.rebooted
           }
         } else {
-          console.log("agent back online")
           update_time = updateTime
           state = "online"
+          rebooted = false
         }
         Agent.update({deviceid: deviceId}, {
           $set: { mac: devicemac, update_time: update_time,
-            ip:deviceip, state: state }}, function (err, agent) {
+            ip:deviceip, state: state, rebooted: rebooted }}, function (err, agent) {
           console.log('updated', agent)
         });
       }

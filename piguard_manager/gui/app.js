@@ -1,8 +1,8 @@
 (function() {
   var app = angular.module('piguard', []);
   app.controller('AgentsController', ['$scope', '$http', '$interval', function($scope, $http, $interval) {
-    //var api_url = 'https://piguard-manager.herokuapp.com/api';
-    var api_url = 'http://127.0.0.1:8000/api'
+    var api_url = 'https://piguard-manager.herokuapp.com/api';
+    //var api_url = 'http://127.0.0.1:8000/api'
     var agents = this;
     var config = {
       headers : {
@@ -22,6 +22,15 @@
     $scope.arm = function(deviceid, on) {
       var json_data = {
         alarm_on: on
+      }
+      $http.put( api_url + '/agents/' + deviceid, json_data, config).success(function() {
+        $scope.getAgents()
+      });
+    }
+
+    $scope.reboot = function(deviceid) {
+      var json_data = {
+        reboot: true
       }
       $http.put( api_url + '/agents/' + deviceid, json_data, config).success(function() {
         $scope.getAgents()

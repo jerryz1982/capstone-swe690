@@ -84,12 +84,11 @@ def on_message(client, userdata, message):
       print("not for me, move on")
       return
     print("Received message " + str(message.payload) + " on topic " + message.topic)
-    if 'delete' in message_json:
+    if 'reboot' in message_json and message_json['reboot']:
       try:
-        api.destroy_status(message_json["delete"])
-        print("tweet deleted")
-      except TweepError:
-        print("tweet doesn't exist")
+        os.system('/sbin/reboot')
+      except Exception:
+        print("reboot failed")
     if 'twitter_handles' in message_json:
         at = ' @'
         print message_json["twitter_handles"]

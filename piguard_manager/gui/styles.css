@@ -105,6 +105,10 @@ button {
     cursor: pointer;
 }
 
+button:disabled {
+    background-color: gray
+}
+
 .navbar-logo {
   width: 48px;
   height: 48px;

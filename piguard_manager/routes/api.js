@@ -4,6 +4,7 @@ var Agent = require('../db/models/agent.js');
 var Alarm = require('../db/models/alarm.js');
 var mqtt_ctl = require('../mqtt-ctl.js')
 var twitter = require('../twitter.js')
+var utils = require('../utils.js')
 
 // GET
 exports.agents = function (req, res) {
@@ -90,10 +91,13 @@ exports.updateAgent = function (req, res) {
   control_message["deviceid"] = req.params.id;
   control_message["alarm_on"] = req.body["alarm_on"];
   control_message["reboot"] = req.body["reboot"];
+  if (req.body["reboot"]) { state = "offline"}
   mqtt_ctl.control_agent(JSON.stringify(control_message))
   console.log(JSON.stringify(control_message));
   Agent.update({deviceid: req.params.id}, {
     alarm_on: req.body["alarm_on"],
+    rebooted: req.body["reboot"],
+    state: state
   }, function(err) {
       if(!err) {
         res.send('{"status": "ok"}')
