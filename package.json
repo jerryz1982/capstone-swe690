@@ -12,7 +12,8 @@
     "newrelic": "^1.28.3",
     "passport": "^0.3.2",
     "passport-twitter": "^1.0.4",
-    "r-json": "^1.2.3"
+    "r-json": "^1.2.3",
+    "twit": "^2.2.4"
   },
   "devDependencies": {},
   "scripts": {

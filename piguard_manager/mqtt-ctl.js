@@ -77,7 +77,8 @@ controller.on('message', function (topic, message) {
 },
 
   control_agent: function(message) {
-    controller.publish(mqtt_topic_control, message)
+    controller.publish(mqtt_topic_control, message, {qos: 1, retain: true})
+    console.log('sent control message', message)
   },
 
 }

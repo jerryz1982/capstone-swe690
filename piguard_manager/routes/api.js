@@ -3,6 +3,8 @@ var mongoose = require('mongoose');
 var Agent = require('../db/models/agent.js');
 var Alarm = require('../db/models/alarm.js');
 var mqtt_ctl = require('../mqtt-ctl.js')
+var twitter = require('../twitter.js')
+
 // GET
 exports.agents = function (req, res) {
   console.log('Getting agents.');
@@ -63,9 +65,7 @@ exports.deleteAlarm = function (req, res) {
     var control_message = {};
     if (alarm) {
       if (alarm["tweet_id"]) {
-        control_message["deviceid"] = alarm["deviceid"];
-        control_message["delete"] = alarm["tweet_id"];
-        mqtt_ctl.control_agent(JSON.stringify(control_message))
+        twitter.delete_tweet(alarm["tweet_id"])
       }
       Alarm.remove({'_id': id}, function(err) {
         if (!err) {
