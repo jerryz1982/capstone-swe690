@@ -1,0 +1,4 @@
+to start the piguard agent:
+docker run -d --privileged -v /opt/vc/lib:/opt/vc/lib -v /dev/mem:/dev/mem jerryz/piguard-agent:raspbian
+to build the piguard agent image:
+docker build -t jerryz/piguard-agent:raspbian .

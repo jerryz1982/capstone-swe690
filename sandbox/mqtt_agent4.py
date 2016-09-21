@@ -10,6 +10,13 @@ import os
 
 from tweepy.error import TweepError
 
+import sys
+import logging
+
+logger = logging.getLogger('piguard-agent')
+formatter = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG, format=formatter)
+
 sleepTime = 10
 deviceid = "Raspberry-Pi:Prototype"
 
@@ -35,7 +42,7 @@ def init_camera():
         global camera
         camera = PiCamera()
     except cam_exception.PiCameraError:
-        print("camera not enabled")
+        logger.info("camera not enabled")
 
 
 
@@ -65,50 +72,52 @@ GPIO.setup(door_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 # Callback methods  
 def on_connect(client, userdata, flags, rc):  
     if rc == 0:  
-          print("Connected to MQTT broker (RC: %s)" % rc)
+          logger.info("Connected to MQTT broker (RC: %s)" % rc)
     else:  
-          print("Connection to MQTT broker failed (RC: %s)" % rc)   
+          logger.info("Connection to MQTT broker failed (RC: %s)" % rc)   
+    mqttClient.subscribe(mqttControlTopic, 1)
+    mqttClient.subscribe(mqttConfigTopic, 0)
 def on_log(client, userdata, level, buf):  
-    print(buf)  
+    logger.info(buf)  
 def on_publish(client, userdata, mid):  
-    print("Data published (Mid: %s)" % mid)  
+    logger.info("Data published (Mid: %s)" % mid)  
 def on_disconnect(client, userdata, rc):  
     if rc != 0:  
-          print("Unexpected disconnect")  
-    print("Disconnected from MQTT broker")  
+          logger.warning("Unexpected disconnect")  
+    logger.warning("Disconnected from MQTT broker")  
 def on_subscribe(client, userdata, mid, granted_qos):
-    print("Subscribed on topic")
+    logger.info("Subscribed on topic")
 def on_message(client, userdata, message):
     message_json = json.loads(message.payload)
     if message_json["deviceid"].lower() != mqttDeviceId.lower():
-      print("not for me, move on")
+      logger.info("not for me, move on")
       return
-    print("Received message " + str(message.payload) + " on topic " + message.topic)
+    logger.info("Received message " + str(message.payload) + " on topic " + message.topic)
     if 'reboot' in message_json and message_json['reboot']:
       try:
         os.system('/sbin/reboot')
       except Exception:
-        print("reboot failed")
+        logger.info("reboot failed")
     if 'twitter_handles' in message_json:
         at = ' @'
-        print message_json["twitter_handles"]
+        logger.info(message_json["twitter_handles"])
         config.twitter_handles = at.join(message_json["twitter_handles"])
     if 'alarm_on' in message_json:
       alarm = message_json["alarm_on"]
       if not alarm:
-          print("Alarm off")
+          logger.info("Alarm off")
           GPIO.remove_event_detect(pir_pin)
           GPIO.remove_event_detect(door_pin)
           GPIO.output(alert_pin, False)
       else:
-          print("Alarm on")
+          logger.info("Alarm on")
           try:
               GPIO.add_event_detect(pir_pin, GPIO.RISING)
               GPIO.add_event_detect(door_pin, GPIO.RISING)
               GPIO.add_event_callback(pir_pin, alarm_callback)
               GPIO.add_event_callback(door_pin, alarm_callback)
           except RuntimeError:
-              print("alarm is already on")
+              logger.warning("alarm is already on")
 
 mqttClient = paho.mqtt.client.Client()  
 mqttClient.username_pw_set(mqttVhost + ":" + mqttUser, mqttPassword)  
@@ -124,7 +133,7 @@ mqttClient.connect(mqttBrokerHost, mqttBrokerPort, 60)
 mqttClient.loop_start()  
 # Collect telemetry information from Sense HAT and publish to MQTT broker in JSON format  
 mqttClient.subscribe(mqttControlTopic, 1)
-mqttClient.subscribe(mqttConfigTopic, 1)
+mqttClient.subscribe(mqttConfigTopic, 0)
 registryData = {}
 registryData["DeviceId"] = mqttDeviceId
 
@@ -141,14 +150,20 @@ def alarm_callback(channel, deviceid=deviceid):
     timestamp = time.strftime("%y%m%d_%H%M%S")
     if channel == pir_pin:
         alarm_type = "motion"
-        filename = "".join(["/tmp/pic", timestamp, ".jpg"])
-        camera.capture(filename)
         message = "#" + alarm_type + "5493 Detected at " + timestamp + " by #" + deviceid + " @" + config.twitter_handles
-        try:
-            tweet = api.update_with_media(filename, status=message)
-        except:
-            tweet = None
-        os.remove(filename)
+        if camera:
+            filename = "".join(["/tmp/pic", timestamp, ".jpg"])
+            camera.capture(filename)
+            try:
+                tweet = api.update_with_media(filename, status=message)
+            except:
+                tweet = None
+            os.remove(filename)
+        else:
+            try:
+                tweet = api.update_status(message)
+            except:
+                tweet = None
     if channel == door_pin:
         if GPIO.input(channel):
             alarm_type = "door"
@@ -159,7 +174,7 @@ def alarm_callback(channel, deviceid=deviceid):
                 tweet = None
         else:
             return
-    print(message)
+    logger.info(message)
     telemetryData = {}
     telemetryData["DeviceId"] = deviceid
     telemetryData["Timestamp"] = timestamp
@@ -168,19 +183,25 @@ def alarm_callback(channel, deviceid=deviceid):
         telemetryData["Tweet_id"] = str(tweet.id)
         telemetryData["Tweet_url"] = "https://twitter.com/" + tweet._json["user"]["screen_name"] + "/statuses/" + telemetryData["Tweet_id"]
     telemetryDataJson = json.dumps(telemetryData)
-    mqttClient.publish(mqttTelemetryTopic, telemetryDataJson, 1)
+    try:
+        mqttClient.publish(mqttTelemetryTopic, telemetryDataJson, 1)
+    except Exception:
+        logging.error("mqtt connection failed")
     GPIO.output(alert_pin, True)
 
 def main_loop(sleep=sleepTime):
     init_camera()
     while True:
-        mqttClient.publish(mqttRegisterTopic, registryDataJson, 0)
+        try:
+            mqttClient.publish(mqttRegisterTopic, registryDataJson, 0)
+        except Exception:
+            logging.error("mqtt connection failed")
         time.sleep(sleep)
 
 if __name__ == '__main__':
     try:
         main_loop()
     except KeyboardInterrupt:
-        print("exiting by keyboard interrupt")
+        logger.info("exiting by keyboard interrupt")
         mqttClient.loop_stop()
         mqttClient.disconnect()

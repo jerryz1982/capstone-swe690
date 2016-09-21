@@ -1,4 +1,5 @@
+netifaces
 paho-mqtt
 picamera
-gpio
+RPi.GPIO
 tweepy

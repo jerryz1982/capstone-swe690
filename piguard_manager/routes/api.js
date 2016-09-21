@@ -87,18 +87,26 @@ exports.deleteAlarm = function (req, res) {
 exports.updateAgent = function (req, res) {
   console.log('Updating agent');
   var control_message = {};
+  var db_message = {};
   console.log(req.body)
   control_message["deviceid"] = req.params.id;
   control_message["alarm_on"] = req.body["alarm_on"];
   control_message["reboot"] = req.body["reboot"];
-  if (req.body["reboot"]) { state = "offline"}
+  if (req.body["reboot"]) {
+    db_message = {
+      alarm_on: req.body["alarm_on"],
+      rebooted: req.body["reboot"],
+      state: "offline"
+    }
+  } else {
+    db_message = {
+      alarm_on: req.body["alarm_on"],
+      rebooted: req.body["reboot"]
+    }
+  }
   mqtt_ctl.control_agent(JSON.stringify(control_message))
   console.log(JSON.stringify(control_message));
-  Agent.update({deviceid: req.params.id}, {
-    alarm_on: req.body["alarm_on"],
-    rebooted: req.body["reboot"],
-    state: state
-  }, function(err) {
+  Agent.update({deviceid: req.params.id}, db_message, function(err) {
       if(!err) {
         res.send('{"status": "ok"}')
       }
