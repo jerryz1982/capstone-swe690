@@ -1,0 +1,13 @@
+[Unit]
+Description=piguard agent container
+Requires=docker.service
+After=docker.service
+
+[Service]
+Restart=always
+ExecStart=/usr/bin/docker start -a piguard-agent
+ExecStop=/usr/bin/docker stop -t 2 piguard-agent
+
+[Install]
+WantedBy=default.target
+

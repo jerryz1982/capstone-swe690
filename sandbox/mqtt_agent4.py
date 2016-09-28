@@ -7,6 +7,7 @@ import tweepy
 from picamera import PiCamera
 from picamera import exc as cam_exception
 import os
+import uuid
 
 from tweepy.error import TweepError
 
@@ -18,7 +19,7 @@ formatter = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG, format=formatter)
 
 sleepTime = 10
-deviceid = "Raspberry-Pi:Prototype"
+deviceid = os.getenv('PI_DEVICE_ID', str(uuid.uuid1()))
 
 class AgentConfig(object):
     def __init__(self):
