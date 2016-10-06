@@ -7,7 +7,7 @@ import tweepy
 from picamera import PiCamera
 from picamera import exc as cam_exception
 import os
-import uuid
+import pyttsx
 
 from tweepy.error import TweepError
 
@@ -19,7 +19,7 @@ formatter = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG, format=formatter)
 
 sleepTime = 10
-deviceid = os.getenv('PI_DEVICE_ID', str(uuid.uuid1()))
+deviceid = "Raspberry-Pi:Prototype"
 
 class AgentConfig(object):
     def __init__(self):
@@ -43,9 +43,16 @@ def init_camera():
         global camera
         camera = PiCamera()
     except cam_exception.PiCameraError:
+        camera = None
         logger.info("camera not enabled")
 
 
+def init_speech():
+    try:
+        global engine
+        engine = pyttsx.init()
+    except Exception:
+        logger.warning('speech module init failed')
 
 # MQTT details  
 mqttDeviceId = deviceid 
@@ -93,12 +100,24 @@ def on_message(client, userdata, message):
     if message_json["deviceid"].lower() != mqttDeviceId.lower():
       logger.info("not for me, move on")
       return
+    else:
+      logger.info('received message', message_json)
     logger.info("Received message " + str(message.payload) + " on topic " + message.topic)
     if 'reboot' in message_json and message_json['reboot']:
       try:
         os.system('/sbin/reboot')
       except Exception:
         logger.info("reboot failed")
+    if 'speech' in message_json and message_json['speech']:
+      try:
+        engine.say('incoming message: {0}'.format(message_json['speech']))
+        engine.runAndWait()
+      except Exception, e:
+        logger.warning('speech not enabled: {0}'.format(e))
+    if 'dryrun' in message_json and message_json['dryrun']:
+        logger.info("testing testing")
+        alarm_callback(pir_pin, deviceid)
+        alarm_callback(door_pin, deviceid)
     if 'twitter_handles' in message_json:
         at = ' @'
         logger.info(message_json["twitter_handles"])
@@ -192,6 +211,7 @@ def alarm_callback(channel, deviceid=deviceid):
 
 def main_loop(sleep=sleepTime):
     init_camera()
+    init_speech()
     while True:
         try:
             mqttClient.publish(mqttRegisterTopic, registryDataJson, 0)

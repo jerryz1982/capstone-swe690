@@ -92,6 +92,8 @@ exports.updateAgent = function (req, res) {
   control_message["deviceid"] = req.params.id;
   control_message["alarm_on"] = req.body["alarm_on"];
   control_message["reboot"] = req.body["reboot"];
+  control_message["speech"] = req.body["speech"];
+  control_message["dryrun"] = req.body["dryrun"];
   if (req.body["reboot"]) {
     db_message = {
       alarm_on: req.body["alarm_on"],

@@ -19,6 +19,16 @@
       agents.items = agents_data;
     });
 
+    $scope.control = function(deviceid, opt, val) {
+      var json_data = {
+        [opt]: val,
+      }
+      //json_data[opt] = val
+      $http.put( api_url + '/agents/' + deviceid, json_data, config).success(function() {
+        $scope.getAgents()
+      });
+    }
+
     $scope.arm = function(deviceid, on) {
       var json_data = {
         alarm_on: on
@@ -31,6 +41,15 @@
     $scope.reboot = function(deviceid) {
       var json_data = {
         reboot: true
+      }
+      $http.put( api_url + '/agents/' + deviceid, json_data, config).success(function() {
+        $scope.getAgents()
+      });
+    }
+
+    $scope.dryrun = function(deviceid) {
+      var json_data = {
+        dryrun: true
       }
       $http.put( api_url + '/agents/' + deviceid, json_data, config).success(function() {
         $scope.getAgents()
