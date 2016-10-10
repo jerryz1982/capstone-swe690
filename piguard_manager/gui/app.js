@@ -1,6 +1,5 @@
-(function() {
-  var app = angular.module('piguard', []);
-  app.controller('AgentsController', ['$scope', '$http', '$interval', function($scope, $http, $interval) {
+  var app = angular.module('piguard', ['ui.bootstrap']);
+  app.controller('AgentsController', ['$scope', '$http', '$uibModal', '$interval', '$log', function($scope, $http, $uibModal, $interval, $log) {
     var api_url = 'https://piguard-manager.herokuapp.com/api';
     //var api_url = 'http://127.0.0.1:8000/api'
     var agents = this;
@@ -24,33 +23,6 @@
         [opt]: val,
       }
       //json_data[opt] = val
-      $http.put( api_url + '/agents/' + deviceid, json_data, config).success(function() {
-        $scope.getAgents()
-      });
-    }
-
-    $scope.arm = function(deviceid, on) {
-      var json_data = {
-        alarm_on: on
-      }
-      $http.put( api_url + '/agents/' + deviceid, json_data, config).success(function() {
-        $scope.getAgents()
-      });
-    }
-
-    $scope.reboot = function(deviceid) {
-      var json_data = {
-        reboot: true
-      }
-      $http.put( api_url + '/agents/' + deviceid, json_data, config).success(function() {
-        $scope.getAgents()
-      });
-    }
-
-    $scope.dryrun = function(deviceid) {
-      var json_data = {
-        dryrun: true
-      }
       $http.put( api_url + '/agents/' + deviceid, json_data, config).success(function() {
         $scope.getAgents()
       });
@@ -110,6 +82,54 @@
     $interval(function() {
       $scope.getAgents()
     }, 5000);
-  }]);
 
-})();
+
+        $scope.showForm = function (deviceid) {
+            var modalInstance = $uibModal.open({
+                templateUrl: 'modal-form.html',
+                controller: ModalInstanceCtrl,
+                backdrop  : 'static',
+                scope: $scope,
+                resolve: {
+                    userForm: function () {
+                        return $scope.userForm;
+                    },
+                    deviceid: function () {
+                        return deviceid;
+                    }
+                    
+                }
+            });
+
+            modalInstance.result.then(function (selectedItem) {
+                $scope.selected = selectedItem;
+            }, function () {
+                $log.info('Modal dismissed at: ' + new Date());
+            });
+        };
+
+}]);
+
+var ModalInstanceCtrl = function ($scope, $uibModalInstance, deviceid) {
+    $scope.userForm = {}
+    $scope.submitForm = function () {
+        if ($scope.userForm.$valid) {
+            console.log(deviceid, 'is saying ', $scope.userForm.string);
+            $scope.control(deviceid, "speech", $scope.userForm.string)
+            $uibModalInstance.close('closed');
+        } else {
+            console.log('userform is not in scope');
+        }
+    };
+
+    $scope.cancel = function () {
+        $uibModalInstance.dismiss('cancel');
+    };
+
+    $scope.$on('modal.closing', function(event, reason, closed) {
+    if (reason == "$uibUnscheduledDestruction") {
+        event.preventDefault();
+    }
+    });
+};
+

@@ -1,0 +1,17 @@
+<div class="modal-header">
+    <h3>Say Something!</h3>
+</div>
+<form name="userForm" ng-submit="submitForm(agent.deviceid)" novalidate>
+    <div class="modal-body">
+        <!-- NAME -->
+        <div class="form-group">
+            <label>Words</label>
+            <input type="text" name="userForm[string]" class="form-control" ng-model="userForm.string" required>
+            <p ng-show="userForm.string.$invalid && !userForm.string.$pristine" class="help-block">Words are required.</p>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary" ng-disabled="userForm.$invalid">OK</button>
+        <button type="button" class="btn btn-warning" ng-click="cancel()">Cancel</button>
+    </div>
+</form>

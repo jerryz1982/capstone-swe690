@@ -30,7 +30,7 @@
         <button ng-disabled="agent.rebooted === true || agent.state === 'offline'"
                 ng-click='control(agent.deviceid, "dryrun", true); $event.stopPropagation()'>DryRun</button>
         <button ng-disabled="agent.rebooted === true || agent.state === 'offline'"
-                ng-click='control(agent.deviceid, "speech", "hello world"); $event.stopPropagation()'>Speech</button>
+                ng-click='showForm(agent.deviceid); $event.stopPropagation()'>Speech</button>
         </td>
         <td data-title="Alarms">
           <span ng-class="agentsctrlr[agent.deviceid].color">
