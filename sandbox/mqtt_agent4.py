@@ -18,7 +18,7 @@ logger = logging.getLogger('piguard-agent')
 formatter = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG, format=formatter)
 
-sleepTime = 10
+sleepTime = 30
 deviceid = "Raspberry-Pi:Prototype"
 
 class AgentConfig(object):

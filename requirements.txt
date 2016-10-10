@@ -3,3 +3,4 @@ paho-mqtt
 picamera
 RPi.GPIO
 tweepy
+pyttsx
