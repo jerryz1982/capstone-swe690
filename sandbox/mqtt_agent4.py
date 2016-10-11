@@ -8,7 +8,7 @@ from picamera import PiCamera
 from picamera import exc as cam_exception
 import os
 import pyttsx
-
+import uuid
 from tweepy.error import TweepError
 
 import sys
@@ -16,10 +16,10 @@ import logging
 
 logger = logging.getLogger('piguard-agent')
 formatter = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-logging.basicConfig(stream=sys.stdout, level=logging.DEBUG, format=formatter)
+logging.basicConfig(stream=sys.stdout, level=logging.INFO, format=formatter)
 
 sleepTime = 30
-deviceid = "Raspberry-Pi:Prototype"
+deviceid = os.getenv('PI_DEVICE_ID', str(uuid.uuid1()))
 
 class AgentConfig(object):
     def __init__(self):
@@ -51,8 +51,8 @@ def init_speech():
     try:
         global engine
         engine = pyttsx.init()
-    except Exception:
-        logger.warning('speech module init failed')
+    except Exception as e:
+        logger.warning('speech module init failed:{0}'.format(e))
 
 # MQTT details  
 mqttDeviceId = deviceid 
@@ -110,6 +110,7 @@ def on_message(client, userdata, message):
         logger.info("reboot failed")
     if 'speech' in message_json and message_json['speech']:
       try:
+        #os.system("/usr/bin/flite -t hello")
         engine.say('incoming message: {0}'.format(message_json['speech']))
         engine.runAndWait()
       except Exception, e:
@@ -117,7 +118,7 @@ def on_message(client, userdata, message):
     if 'dryrun' in message_json and message_json['dryrun']:
         logger.info("testing testing")
         alarm_callback(pir_pin, deviceid)
-        alarm_callback(door_pin, deviceid)
+        alarm_callback(door_pin, deviceid, True)
     if 'twitter_handles' in message_json:
         at = ' @'
         logger.info(message_json["twitter_handles"])
@@ -166,7 +167,7 @@ registryData["MacAddr"] = mac_address
 registryDataJson = json.dumps(registryData)
 
 
-def alarm_callback(channel, deviceid=deviceid):
+def alarm_callback(channel, deviceid=deviceid, dryrun=False):
     timestamp = time.strftime("%y%m%d_%H%M%S")
     if channel == pir_pin:
         alarm_type = "motion"
@@ -185,7 +186,7 @@ def alarm_callback(channel, deviceid=deviceid):
             except:
                 tweet = None
     if channel == door_pin:
-        if GPIO.input(channel):
+        if GPIO.input(channel) or dryrun:
             alarm_type = "door"
             message = "#" + alarm_type + "5493 Detected at " + timestamp + " by #" + deviceid + " @" + config.twitter_handles
             try:
