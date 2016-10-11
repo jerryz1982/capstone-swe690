@@ -1,0 +1,4 @@
+MQTT_USER=dfwxdeyo
+MQTT_PASS=GTFbKpT7scn2nXgrWrtzfRLaniD0wfMr
+MQTT_HOST=hyena.rmq.cloudamqp.com
+PI_DEVICE_ID=RaspberryPi:docker

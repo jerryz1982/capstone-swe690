@@ -1,0 +1,4 @@
+MQTT_USER=wdaqzwhm
+MQTT_PASS=WYfU_5mMfYUqbJ2BHsRt3yYn_GXR0pGN
+MQTT_HOST=black-boar.rmq.cloudamqp.com
+PI_DEVICE_ID=Raspberry-Pi:Prototype

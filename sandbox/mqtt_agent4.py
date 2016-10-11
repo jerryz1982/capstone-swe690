@@ -56,11 +56,11 @@ def init_speech():
 
 # MQTT details  
 mqttDeviceId = deviceid 
-mqttBrokerHost = "hyena.rmq.cloudamqp.com"  
+mqttBrokerHost = os.getenv('MQTT_HOST', "hyena.rmq.cloudamqp.com")
 mqttBrokerPort = 1883
-mqttUser = "dfwxdeyo"  
-mqttPassword = "GTFbKpT7scn2nXgrWrtzfRLaniD0wfMr"  
-mqttVhost = "dfwxdeyo"
+mqttUser = os.getenv('MQTT_USER', 'dfwxdeyo')
+mqttPassword = os.getenv('MQTT_PASS', "GTFbKpT7scn2nXgrWrtzfRLaniD0wfMr")
+mqttVhost = os.getenv('MQTT_USER', 'dfwxdeyo')
 mqttTelemetryTopic = "RPi.Data"
 mqttControlTopic = "RPi.Control"
 mqttRegisterTopic = "RPi.Register"
