@@ -1,7 +1,7 @@
   var app = angular.module('piguard', ['ui.bootstrap']);
   app.controller('AgentsController', ['$scope', '$http', '$uibModal', '$interval', '$log', function($scope, $http, $uibModal, $interval, $log) {
-    var api_url = 'https://piguard-manager.herokuapp.com/api';
-    //var api_url = 'http://127.0.0.1:8000/api'
+    //var api_url = 'https://piguard-manager.herokuapp.com/api';
+    var api_url = 'http://127.0.0.1:8000/api'
     var agents = this;
     var config = {
       headers : {
