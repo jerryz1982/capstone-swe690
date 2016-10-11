@@ -23,13 +23,13 @@
         <td data-title="Update Time">{{ agent.update_time }}</td>
         <td data-title="Status"><div ng-class="agentsctrlr[agent.deviceid].state" title="{{ agent.state }}"></div></td>
         <td data-title="Actions">
-        <button ng-show="agent.alarm_on" ng-click='control(agent.deviceid, "alarm_on", false); $event.stopPropagation()'>Disarm</button>
-        <button ng-hide="agent.alarm_on" ng-click='control(agent.deviceid, "alarm_on", true); $event.stopPropagation()'>Arm</button>
-        <button ng-disabled="agent.rebooted === true || agent.state === 'offline'"
+        <button class="btn btn-primary" ng-show="agent.alarm_on" ng-click='control(agent.deviceid, "alarm_on", false); $event.stopPropagation()'>Disarm</button>
+        <button class="btn btn-primary" ng-hide="agent.alarm_on" ng-click='control(agent.deviceid, "alarm_on", true); $event.stopPropagation()'>Arm</button>
+        <button class="btn btn-primary" ng-disabled="agent.rebooted === true || agent.state === 'offline'"
                 ng-click='control(agent.deviceid, "reboot", true); $event.stopPropagation()'>Reboot</button>
-        <button ng-disabled="agent.rebooted === true || agent.state === 'offline'"
+        <button class="btn btn-primary" ng-disabled="agent.rebooted === true || agent.state === 'offline'"
                 ng-click='control(agent.deviceid, "dryrun", true); $event.stopPropagation()'>DryRun</button>
-        <button ng-disabled="agent.rebooted === true || agent.state === 'offline'"
+        <button class="btn btn-primary" ng-disabled="agent.rebooted === true || agent.state === 'offline'"
                 ng-click='showForm(agent.deviceid); $event.stopPropagation()'>Speech</button>
         </td>
         <td data-title="Alarms">

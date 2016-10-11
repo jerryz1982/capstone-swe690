@@ -92,23 +92,6 @@ span {
   box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset lightgray 0 -1px 9px, #9EA4A4 0 2px 12px;
 }
 
-button {
-    background-color: #008CBA; /* Blue */
-    border: none;
-    color: white;
-    padding: 5px 10px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 1em;
-    margin: 2px 1px;
-    cursor: pointer;
-}
-
-button:disabled {
-    background-color: gray
-}
-
 .navbar-logo {
   width: 48px;
   height: 48px;
