@@ -90,21 +90,21 @@ exports.updateAgent = function (req, res) {
   var db_message = {};
   console.log(req.body)
   control_message["deviceid"] = req.params.id;
-  control_message["alarm_on"] = req.body["alarm_on"];
-  control_message["reboot"] = req.body["reboot"];
-  control_message["speech"] = req.body["speech"];
-  control_message["dryrun"] = req.body["dryrun"];
   if (req.body["reboot"]) {
     db_message = {
-      alarm_on: req.body["alarm_on"],
       rebooted: req.body["reboot"],
       state: "offline"
     }
-  } else {
+    control_message["reboot"] = req.body["reboot"]
+  } else if ("alarm_on" in req.body){
     db_message = {
       alarm_on: req.body["alarm_on"],
-      rebooted: req.body["reboot"]
-    }
+    };
+    control_message["alarm_on"] = req.body["alarm_on"];
+  } else if ("speech" in req.body) {
+    control_message["speech"] = req.body["speech"]
+  } else {
+    control_message["dryrun"] = req.body["dryrun"]
   }
   mqtt_ctl.control_agent(JSON.stringify(control_message))
   console.log(JSON.stringify(control_message));
