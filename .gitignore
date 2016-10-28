@@ -25,3 +25,4 @@ subunit.log
 *node_modules
 *newrelic*
 *test/
+*mqttrc

@@ -168,12 +168,13 @@ registryDataJson = json.dumps(registryData)
 
 
 def alarm_callback(channel, deviceid=deviceid, dryrun=False):
-    timestamp = time.strftime("%y%m%d_%H%M%S")
+    timestamp = time.strftime("%y-%m-%d_%H:%M:%S_%Z")
     if channel == pir_pin:
         alarm_type = "motion"
         message = "#" + alarm_type + "5493 Detected at " + timestamp + " by #" + deviceid + " @" + config.twitter_handles
         if camera:
             filename = "".join(["/tmp/pic", timestamp, ".jpg"])
+            camera.annotate_text = timestamp
             camera.capture(filename)
             try:
                 tweet = api.update_with_media(filename, status=message)

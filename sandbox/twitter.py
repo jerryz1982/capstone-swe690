@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
  
 import tweepy, time, sys
+sys.path.insert(0, "/home/pi/capstone-swe690")
 from piguard.common import config
 
 cfg = config.PiguardConfig() 
@@ -18,5 +19,11 @@ api = tweepy.API(auth)
  
 line = "hello world @xyzjerry #motion5493" 
 #api.update_status(line)
-tweet_status = api.update_with_media("/home/dahoo/Pictures/helloworld.gif", line)
-import pdb; pdb.set_trace()
+#tweet_status = api.update_with_media("/home/dahoo/Pictures/helloworld.gif", line)
+#delete all tweets
+for status in tweepy.Cursor(api.user_timeline).items():
+    try:
+        api.destroy_status(status.id)
+        print "Deleted:", status.id
+    except:
+        print "Failed to delete:", status.id
