@@ -61,10 +61,10 @@ mqttBrokerPort = 1883
 mqttUser = os.getenv('MQTT_USER', 'dfwxdeyo')
 mqttPassword = os.getenv('MQTT_PASS', "GTFbKpT7scn2nXgrWrtzfRLaniD0wfMr")
 #mqttVhost = os.getenv('MQTT_USER', 'dfwxdeyo')
-mqttTelemetryTopic = "RPi.Data"
-mqttControlTopic = "RPi.Control"
-mqttRegisterTopic = "RPi.Register"
-mqttConfigTopic = "RPi.Config"
+mqttTelemetryTopic = "RPi/Data"
+mqttControlTopic = "RPi/Control"
+mqttRegisterTopic = "RPi/Register"
+mqttConfigTopic = "RPi/Config"
 
 # GPIO pins
 door_pin = 27
