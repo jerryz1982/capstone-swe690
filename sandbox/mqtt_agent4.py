@@ -60,7 +60,7 @@ mqttBrokerHost = os.getenv('MQTT_HOST', "hyena.rmq.cloudamqp.com")
 mqttBrokerPort = 1883
 mqttUser = os.getenv('MQTT_USER', 'dfwxdeyo')
 mqttPassword = os.getenv('MQTT_PASS', "GTFbKpT7scn2nXgrWrtzfRLaniD0wfMr")
-mqttVhost = os.getenv('MQTT_USER', 'dfwxdeyo')
+#mqttVhost = os.getenv('MQTT_USER', 'dfwxdeyo')
 mqttTelemetryTopic = "RPi.Data"
 mqttControlTopic = "RPi.Control"
 mqttRegisterTopic = "RPi.Register"
@@ -140,8 +140,9 @@ def on_message(client, userdata, message):
           except RuntimeError:
               logger.warning("alarm is already on")
 
-mqttClient = paho.mqtt.client.Client()  
-mqttClient.username_pw_set(mqttVhost + ":" + mqttUser, mqttPassword)  
+mqttClient = paho.mqtt.client.Client(protocol=3)  
+#mqttClient.username_pw_set(mqttVhost + ":" + mqttUser, mqttPassword)  
+mqttClient.username_pw_set(mqttUser, mqttPassword)
 #mqttClient.username_pw_set(mqttUser, mqttPassword)
 # Register callbacks  
 mqttClient.on_connect = on_connect  
