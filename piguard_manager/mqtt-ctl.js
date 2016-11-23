@@ -23,7 +23,7 @@ var mqtt_url2  = 'mqtt://' + mqtt_host2 + ':' + mqtt_port;
 var mqtt_url3  = 'mqtt://' + mqtt_host3 + ':' + mqtt_port;
 var controller1 = mqtt.connect(mqtt_url1, { username: mqtt_vhost1 + ":" + mqtt_user1, password: mqtt_pass1, clientId: 'mqtt-ctl', clean: true });
 var controller2 = mqtt.connect(mqtt_url2, { username: mqtt_vhost2 + ":" + mqtt_user2, password: mqtt_pass2, clientId: 'mqtt-ctl', clean: true });
-var controller3 = mqtt.connect(mqtt_url3, { username: mqtt_user3, password: mqtt_pass3, clientId: 'mqtt-ctl', clean: true })
+var controller3 = mqtt.connect(mqtt_url3, { protocolId: 'MQIsdp', protocolVersion: 3, username: mqtt_user3, password: mqtt_pass3, clientId: 'mqtt-ctl', clean: true })
 var controllers = [controller3]
 
 var config = {}
