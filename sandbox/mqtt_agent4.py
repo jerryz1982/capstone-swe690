@@ -42,6 +42,7 @@ def init_camera():
     try:
         global camera
         camera = PiCamera()
+        logger.info("camera intialized")
     except cam_exception.PiCameraError:
         camera = None
         logger.info("camera not enabled")
@@ -150,12 +151,6 @@ mqttClient.on_log = on_log
 mqttClient.on_publish = on_publish  
 mqttClient.on_disconnnect = on_disconnect  
 mqttClient.on_message = on_message
-# Connect to MQTT broker  
-mqttClient.connect(mqttBrokerHost, mqttBrokerPort, 60)  
-mqttClient.loop_start()  
-# Collect telemetry information from Sense HAT and publish to MQTT broker in JSON format  
-mqttClient.subscribe(mqttControlTopic, 1)
-mqttClient.subscribe(mqttConfigTopic, 0)
 registryData = {}
 registryData["DeviceId"] = mqttDeviceId
 
@@ -215,6 +210,12 @@ def alarm_callback(channel, deviceid=deviceid, dryrun=False):
 def main_loop(sleep=sleepTime):
     init_camera()
     init_speech()
+    # Connect to MQTT broker
+    mqttClient.connect(mqttBrokerHost, mqttBrokerPort, 60)
+    mqttClient.loop_start()
+    # Collect telemetry information from Sense HAT and publish to MQTT broker in JSON format
+    mqttClient.subscribe(mqttControlTopic, 1)
+    mqttClient.subscribe(mqttConfigTopic, 0)
     while True:
         try:
             mqttClient.publish(mqttRegisterTopic, registryDataJson, 0)
